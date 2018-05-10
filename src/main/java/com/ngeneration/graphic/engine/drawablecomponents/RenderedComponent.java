@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public class RenderedComponent {
+public class RenderedComponent implements Cloneable {
     private static final LazyLogger logger = LazyLogger.getLogger(RenderedComponent.class);
 
     protected Vector position;
@@ -84,6 +84,11 @@ public class RenderedComponent {
 
     public void unregisterScheduler(ComponentsScheduler<? extends RenderedComponent> scheduler) {
         schedulers.remove(scheduler);
+    }
+
+    @Override
+    public RenderedComponent clone() throws CloneNotSupportedException {
+        return (RenderedComponent) super.clone();
     }
 
     public Vector getPosition() {

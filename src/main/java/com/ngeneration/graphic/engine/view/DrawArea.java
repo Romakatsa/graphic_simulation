@@ -9,8 +9,8 @@ public abstract class DrawArea implements AutoCloseable {
 
     protected final List<DrawContext> contexts = new ArrayList<>();
     protected final Window holderWindow;
-    protected Vector zoomFactor;
-    protected Vector shift;
+    protected Vector zoomFactor = Vector.one();
+    protected Vector shift = Vector.zero();
 
     public DrawArea(Window holderWindow) {
         this.holderWindow = holderWindow;
@@ -27,6 +27,18 @@ public abstract class DrawArea implements AutoCloseable {
     }
 
     public void close() {
+    }
+
+    public void setZoomFactor(double factor) {
+        this.zoomFactor = Vector.one().multiple(factor);
+    }
+
+    public void setZoom(Vector zoomFactor) {
+        this.zoomFactor = zoomFactor;
+    }
+
+    public void setShift(Vector shift) {
+        this.shift = shift;
     }
 
     public Vector getZoomFactor() {

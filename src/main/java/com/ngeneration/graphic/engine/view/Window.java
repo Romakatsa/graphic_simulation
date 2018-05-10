@@ -1,9 +1,8 @@
 package com.ngeneration.graphic.engine.view;
 
-import com.ngeneration.graphic.engine.Corner;
+import com.ngeneration.graphic.engine.PlaceOnScreen;
 import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.drawers.Drawer;
-import com.ngeneration.graphic.engine.drawers.LwjglDrawer;
 import com.ngeneration.graphic.engine.enums.ColorEnum;
 import com.ngeneration.graphic.engine.lwjgl_engine.GraphicEngine;
 
@@ -40,8 +39,8 @@ public class Window<ID> {
         this.background = background;
     }
 
-    public static <ID> Window create(String title, int x, int y, GraphicEngine<ID> engine) {
-        return create(title, new Vector(x, y), engine, ColorEnum.BLACK);
+    public static <ID> Window create(String title, int width, int height, GraphicEngine<ID> engine) {
+        return create(title, new Vector(width, height), engine, ColorEnum.BLACK);
     }
 
     public static <ID> Window create(String title, Vector size, GraphicEngine<ID> engine, ColorEnum background) {
@@ -63,8 +62,16 @@ public class Window<ID> {
         engine.closeWindow(id);
     }
 
-    public DrawArea allocateArea(Corner corner, double fractionX, double fractionY) {
-        RectDrawArea area = new RectDrawArea(this, corner, fractionX, fractionY);
+    public DrawArea allocateFullScreenArea() {
+        return allocateAreaOnWindow(PlaceOnScreen.FULL_SCREEN, 1, 1);
+    }
+
+    public DrawArea allocateArea(PlaceOnScreen place, double fractionX, double fractionY) {
+        return allocateAreaOnWindow(place, fractionX, fractionY);
+    }
+
+    private DrawArea allocateAreaOnWindow(PlaceOnScreen place, double fractionX, double fractionY) {
+        RectDrawArea area = new RectDrawArea(this, place, fractionX, fractionY);
         areas.add(area);
         return area;
     }

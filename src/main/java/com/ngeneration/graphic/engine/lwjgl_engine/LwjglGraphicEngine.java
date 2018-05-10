@@ -21,13 +21,11 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class LwjglGraphicEngine implements GraphicEngine<Long> {
 
-    //        private long windowId;
-//        private Set<Window> windows;
-    private boolean active = true;
+    private boolean initialized = false;
+    private boolean started = false;
     private boolean pause = false;
 
-    @Override
-    public void init() { //TODO decouple graphic init with window init
+    private synchronized void init() {
         // Setup an error callback. The default implementation
         // will print the error message in System.err.
         GLFWErrorCallback.createPrint(System.err).set();
@@ -43,7 +41,12 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
     }
 
     @Override
-    public Long createWindow(String title, int width, int height, ColorEnum background) {
+    public synchronized Long createWindow(String title, int width, int height, ColorEnum background) {
+        if (!initialized) {
+            init();
+            initialized = true;
+            started = true;
+        }
         // Create the window
         long windowId = glfwCreateWindow(width, height, title, NULL, NULL);
         if (windowId == NULL)
@@ -115,8 +118,8 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
         //TODO decouple shape drawing
         x = x / 50 - 1;
         y = y / 50 - 1;
-        sx = sx / 50 * 0.8;
-        sy = sy / 50 * 1.2;
+        sx = sx / 50 * 1; // TODO this factor define window proportion
+        sy = sy / 50 * 1;
         glPushMatrix();
         chooseColor(color, 0f);
         glTranslated(x, y, 0);
@@ -174,8 +177,8 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
         }
     }
 
-    public boolean isAlive() {
-        return active;
+    public boolean isStarted() {
+        return started;
     }
 
     public boolean isPaused() {
@@ -183,7 +186,7 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
     }
 
     @Override
-    public Drawer getDrawer() {
+    public Drawer<Long> getDrawer() {
         return new LwjglDrawer();
     }
 }

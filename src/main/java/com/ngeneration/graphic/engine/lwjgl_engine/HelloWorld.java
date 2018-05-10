@@ -3,7 +3,7 @@ package com.ngeneration.graphic.engine.lwjgl_engine;
 import com.ngeneration.ComponentsFactory;
 import com.ngeneration.ai.BrownianDriver;
 import com.ngeneration.custom_rendered_components.Car;
-import com.ngeneration.graphic.engine.Corner;
+import com.ngeneration.graphic.engine.PlaceOnScreen;
 import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.view.DrawArea;
 import com.ngeneration.graphic.engine.view.DrawContext;
@@ -24,7 +24,7 @@ public class HelloWorld {
 ////        Window window2 = new Window("Main window", 200, 200, engine);
 ////        window2.create();
 //
-//        DrawArea backgroundArea = window.allocateArea(Corner.TOP_LEFT, 1, 1);
+//        DrawArea backgroundArea = window.allocateArea(Corner.TOP_LEFT_CORNER, 1, 1);
 //        DrawContext mainContext = new DrawContext("main", true, 10);
 //        backgroundArea.addContext(mainContext);
 //

@@ -5,8 +5,6 @@ import com.ngeneration.graphic.engine.drawers.Drawer;
 import com.ngeneration.graphic.engine.enums.ColorEnum;
 
 public interface GraphicEngine<ID> {
-    void init();
-
     ID createWindow(String title, int width, int height, ColorEnum background);
 
     void closeWindow(ID id);
@@ -19,7 +17,7 @@ public interface GraphicEngine<ID> {
 
     void shutdown();
 
-    boolean isAlive();
+    boolean isStarted();
 
     boolean isPaused();
 

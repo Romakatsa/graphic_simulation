@@ -125,13 +125,18 @@ public class DrawContext {
     private List<Layer> allocateLayerNumber(int amount) {
         List<Layer> layers = new ArrayList<>(amount);
         for (int i = 0; i < 100; i++) {
-            layers.add(new Layer());
+            layers.add(new Layer(i));
         }
         return layers;
     }
 
     public class Layer {
         private final List<RenderedComponent> components = Collections.synchronizedList(new ArrayList<>());
+        private final int number;
+
+        public Layer(int number) {
+            this.number = number;
+        }
 
         public List<RenderedComponent> getComponents() {
             return components;
@@ -169,6 +174,10 @@ public class DrawContext {
         private void close() {
             components.forEach(component -> component.unregisterFromContext(DrawContext.this));
             components.clear();
+        }
+
+        public int getNumber() {
+            return number;
         }
     }
 }

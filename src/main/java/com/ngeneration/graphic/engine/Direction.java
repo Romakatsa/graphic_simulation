@@ -45,4 +45,7 @@ public enum Direction {
         }
     }
 
+    public boolean isNone() {
+        return this == NONE;
+    }
 }

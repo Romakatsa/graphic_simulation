@@ -4,7 +4,7 @@ import com.ngeneration.ai.BrownianDriver;
 import com.ngeneration.custom_rendered_components.Car;
 import com.ngeneration.custom_rendered_components.Road;
 import com.ngeneration.graphic.engine.ComponentsScheduler;
-import com.ngeneration.graphic.engine.Corner;
+import com.ngeneration.graphic.engine.PlaceOnScreen;
 import com.ngeneration.graphic.engine.ThreeVector;
 import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.commands.Command;
@@ -22,47 +22,59 @@ import com.ngeneration.graphic.engine.view.Window;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.ngeneration.ComponentsFactory.*;
+import static com.ngeneration.ComponentsFactory.populate;
+
 public class Simulation {
 
     private final Set<Window> windows = new HashSet<>();
     private final Set<RenderedComponent> renderedComponents = new HashSet<>();
     private final Command QUIT = new QuitCommand(this);
 
+    private ComponentsScheduler<RenderedComponent> loop;
+    private ComponentsScheduler<PhysicalRenderedComponent> physics;
+    private ComponentsScheduler<Car> driver;
+
+    private DrawContext player;
+    private DrawContext secondaryRole;
+
     public void start() {
         System.out.println("Loading simulation. . .");
 
         System.out.println("Initialise graphic");
         GraphicEngine<Long> engine = new LwjglGraphicEngine();
-        engine.init();
         Window<Long> window = Window.<Long>create("Main window", 800, 800, engine);
-        DrawArea backgroundArea = window.allocateArea(Corner.TOP_LEFT, 1, 1);
-        DrawContext secondaryRole = new DrawContext("player");
-        DrawContext player = new DrawContext("player");
+        DrawArea backgroundArea = window.allocateFullScreenArea();
+//        DrawArea backgroundAreaReflection = window.allocateFullScreenArea();
+//        backgroundAreaReflection.setZoomFactor(-1);
+//        backgroundAreaReflection.setShift(new Vector(10, 10));
+        secondaryRole = new DrawContext("secondary");
+        player = new DrawContext("player");
+
+        System.out.println("Loading schedulers");
+        loop = new ComponentsScheduler<>(new Loop());
+        physics = new ComponentsScheduler<>(new PhysicalComponentStateUpdater());
+        driver = new ComponentsScheduler<>(new BrownianDriver(1, 0.15));
 
         System.out.println("Loading objects");
-        Car car = ComponentsFactory.aCar()
+        Car prototype = aCar()
                 .withPosition(new Vector(50, 50))
                 .withSize(new Vector(3, 7))
                 .build();
-        Road road = ComponentsFactory.aDirectRoad().build();
+        Road road = aDirectRoad().build();
 
-        System.out.println("Loading schedulers");
-        ComponentsScheduler<PhysicalRenderedComponent> physics
-                = new ComponentsScheduler<>(new PhysicalComponentStateUpdater());
-        ComponentsScheduler<Car> driver = new ComponentsScheduler<>(
-                new BrownianDriver(3, 0.05));
-        ComponentsScheduler<RenderedComponent> loop = new ComponentsScheduler<>(
-                new Loop());
+        populate(prototype, 4,
+                (curCar, iteration) -> curCar.setPosition(new Vector(10 * (iteration / 10), 10 * (iteration % 10))),
+                (curCar, iteration) -> addSchedulers(curCar, driver, loop, physics),
+                (curCar, iteration) -> player.put(10, curCar)
+        );
 
-        addSchedulers(car, driver, loop, physics);
-
-        System.out.println("Create draw contexts");
-        player.put(10, car);
         secondaryRole.put(5, road);
 
         System.out.println("Compose simulation");
         backgroundArea.addContext(secondaryRole);
         backgroundArea.addContext(player);
+//        backgroundAreaReflection.addContext(player);
     }
 
     private <T extends RenderedComponent> void addSchedulers(T component, ComponentsScheduler<? super T>... schedulers) {
@@ -75,7 +87,7 @@ public class Simulation {
     private void addCars(ComponentsScheduler<PhysicalRenderedComponent> physics, ComponentsScheduler<Car> driver,
                          ComponentsScheduler<RenderedComponent> loop, DrawContext player, int number) {
         for (int i = 0; i < number; i++) {
-            Car car0 = ComponentsFactory.aCar()
+            Car car0 = aCar()
                     .withPosition(new Vector(50, 50))
                     .withSize(new Vector(1, 3))
                     .build();

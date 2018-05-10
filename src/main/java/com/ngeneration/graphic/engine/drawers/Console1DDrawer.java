@@ -1,10 +1,11 @@
 package com.ngeneration.graphic.engine.drawers;
 
 import com.ngeneration.graphic.engine.drawablecomponents.RenderedComponent;
+import com.ngeneration.graphic.engine.view.DrawArea;
 import com.ngeneration.graphic.engine.view.Window;
 
 public class Console1DDrawer extends Drawer {
-    public void doRender(RenderedComponent component) {
+    public void doRender(RenderedComponent component, DrawArea area) {
         double position = component.getPosition().getX();
         for (int i = 0; i < Math.abs(position / 10); i++) {
             System.out.print(".");

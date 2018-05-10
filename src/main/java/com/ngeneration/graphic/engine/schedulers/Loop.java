@@ -9,7 +9,7 @@ public class Loop implements Consumer<RenderedComponent> {
     @Override
     public void accept(RenderedComponent component) {
         component.setPosition(
-                new Vector(Math.abs((component.getPosition().getX()+100) % 100),
-                        Math.abs((component.getPosition().getY()+100) % 100)));
+                new Vector(Math.abs((component.getPosition().getX()+100) % 100) - 50,
+                        Math.abs((component.getPosition().getY()+100) % 100) - 50));
     }
 }

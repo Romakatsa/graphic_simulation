@@ -1,6 +1,7 @@
 package com.ngeneration.graphic.engine.drawers;
 
 import com.ngeneration.graphic.engine.drawablecomponents.RenderedComponent;
+import com.ngeneration.graphic.engine.view.DrawArea;
 import com.ngeneration.graphic.engine.view.Window;
 
 public class Console2DDrawer extends Drawer {
@@ -13,7 +14,7 @@ public class Console2DDrawer extends Drawer {
     }
 
     @Override
-    public void doRender(RenderedComponent component) {
+    public void doRender(RenderedComponent component, DrawArea area) {
         double x = Math.abs(component.getPosition().getX());
         double y = Math.abs(component.getPosition().getY());
         int resolution = 20;
