@@ -22,6 +22,7 @@ import com.ngeneration.graphic.engine.view.Window;
 import com.ngeneration.ui.ControlPanel;
 import com.ngeneration.ui.ControlPanelController;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,7 +30,7 @@ import static com.ngeneration.ComponentsFactory.*;
 
 public class Simulation {
 
-    private final Set<Window> windows = new HashSet<>();
+    private final Set<Window<Long>> windows = new HashSet<>();
     private final Set<RenderedComponent> renderedComponents = new HashSet<>();
     private final Command QUIT = new QuitCommand(this);
 
@@ -37,6 +38,7 @@ public class Simulation {
     private ComponentsScheduler<PhysicalRenderedComponent> physics;
     private ComponentsScheduler<Car> driver;
 
+    private DrawContext aiViewContext;
     private DrawContext player;
     private DrawContext secondaryRole;
     private ControlPanelController controlPanelController;
@@ -51,73 +53,123 @@ public class Simulation {
         System.out.println("Prepare Simulation. . .");
 
         System.out.println("Initialise graphic");
-        GraphicEngine<Long> engine = new LwjglGraphicEngine();
-        Window<Long> window = Window.<Long>create("Simulation", 800, 800, engine);
-        windows.add(window);
-        DrawArea backgroundArea = window.allocateFullScreenArea();
-//        DrawArea backgroundAreaReflection = window.allocateFullScreenArea();
-//        DrawArea backgroundAreaReflection2 = window.allocateFullScreenArea();
-//        DrawArea backgroundAreaReflection3 = window.allocateFullScreenArea();
-//        backgroundAreaReflection.setRotationRadian(3.14/4);
-//        backgroundArea.setZoomFactor(0.6);
-//        backgroundArea.setRotationRadian(3.14 / 4);
-//        backgroundArea.setShift(Vector.diag(0));
-//        backgroundAreaReflection.setShift(Vector.diag(0));
-//        backgroundAreaReflection2.setZoom(new Vector(1, -1));
-//        backgroundAreaReflection3.setZoom(new Vector(-1, 1));
-//        backgroundAreaReflection.setShift(new Vector(10, 10));
-        secondaryRole = new DrawContext("secondary");
-        player = new DrawContext("player");
+        initGraphic();
+//        playWithReflection(window);
+//        playWithAreaRotation(backgroundArea);
 
         System.out.println("Loading schedulers");
-        loop = new ComponentsScheduler<>(new Loop());
-        physics = new ComponentsScheduler<>(new PhysicalComponentStateUpdater());
-//        driver = new ComponentsScheduler<>(createDriver(11.2, 1.05));
+        initSchedulers();
 
         System.out.println("Loading objects");
         Car bigCar = aCar()
-                .withSize(new Vector(7, 30))
+                .withSize(new Vector(2, 5))
                 .build();
         Car miniCar = aCar()
                 .withSize(new Vector(3, 7))
                 .build();
-        Road road = aDirectRoad().build();
+//        Road road = aRoad()
+//                .withWidth(30)
+//                .firstPoint(-50, 0)
+//                .nextPoint(0, 0)
+//                .withWidth(10)
+//                .nextPoint(40, 0)
+//                .build();
+        Road road = aRoad()
+                .withWidth(30)
+                .firstPoint(-50, 0)
+                .withWidth(10)
+                .nextPoint(-40, 0)
+                .withWidth(5)
+                .nextPoint(0, 40)
+                .withWidth(45)
+                .nextPoint(50, 0)
+                .build();
 
-//        populate(miniCar, 0,
-//                new UniformPopulator(),
-//                (curCar, iteration) -> curCar.setName(curCar.getName() + iteration),
-//                (curCar, iteration) -> addSchedulers(curCar, driver, loop, physics),
-//                (curCar, iteration) -> player.put(10, curCar)
-//        );
-        populate(miniCar, 1,
-                new UniformPopulator(),
-//                (curCar, iteration) -> curCar.setPosition(new Vector(10 * (iteration / 10), 10 * (iteration % 10))),
-                (curCar, iteration) -> curCar.setName(curCar.getName() + iteration),
+
+//        List<Car> population = new PopulationBuilder<Car>()
+//                .withName(new SimpleNameGenerator<>())
+//                .populate(10);
+        Set<Car> bigCarPopulation = populate(bigCar, 10,
+                new UniformPopulator<>(),
+                new SimpleNameGenerator<>(),
+                new BindingWithScheduler<>(loop, physics),
+                (curCar, iteration) -> addSchedulers(curCar, driver)
+        );
+        Set<Car> miniCarPopulation = populate(miniCar, 1,
+                new FixedPositionPopulator<>(-50, 0),
+                new SimpleNameGenerator<>(),
+                new BindingWithScheduler<>(loop, physics),
                 (curCar, iteration) -> {
-                    IntelligentDriver intelligentDriver = new IntelligentDriver(road);
-                    addSchedulers(curCar, loop, physics,
+                    IntelligentDriver intelligentDriver = new IntelligentDriver(road, aiViewContext);
+                    addSchedulers(curCar,
                             new ComponentsScheduler<>(createDriver(0.0, 0.00)),
-                            new ComponentsScheduler<>(intelligentDriver.new IntelligentDriverViewAnalyzer(), 2000),
-                            new ComponentsScheduler<>(intelligentDriver.new IntelligentDriverController(), 2000)
-                            );
-                },
-                (curCar, iteration) -> player.put(10, curCar)
+                            new ComponentsScheduler<>(intelligentDriver.new IntelligentDriverViewAnalyzer(), 20),
+                            new ComponentsScheduler<>(intelligentDriver.new IntelligentDriverController(), 50)
+                    );
+                }
         );
 
+
+        player.put(10, bigCarPopulation);
+        player.put(10, miniCarPopulation);
         secondaryRole.put(5, road);
+
+        // Simulation
+        System.out.println("Start simulation plot");
+        simulationPlot();
+    }
+
+    private void simulationPlot() {
+
+    }
+
+    private void initSchedulers() {
+        loop = new ComponentsScheduler<>(new Loop());
+        physics = new ComponentsScheduler<>(new PhysicalComponentStateUpdater());
+        driver = new ComponentsScheduler<>(createDriver(11.2, 1.05));
+    }
+
+    private void initGraphic() {
+        GraphicEngine<Long> engine = new LwjglGraphicEngine();
+        Window<Long> window = Window.<Long>create("Simulation", 800, 800, engine);
+        windows.add(window);
+        DrawArea backgroundArea = window.allocateFullScreenArea();
+        secondaryRole = new DrawContext("secondary");
+        player = new DrawContext("player");
+        aiViewContext = new DrawContext("ai");
+
 
         System.out.println("Compose simulation");
         backgroundArea.addContext(secondaryRole);
         backgroundArea.addContext(player);
-//        backgroundAreaReflection.addContext(player);
-//        backgroundAreaReflection2.addContext(player);
-//        backgroundAreaReflection3.addContext(player);
+        backgroundArea.addContext(aiViewContext);
+    }
 
-        // Control panel
-        // Simulation
-        System.out.println("Start simulation");
+    private void playWithAreaRotation(DrawArea backgroundArea) {
+        backgroundArea.setZoomFactor(0.6);
+        ComponentsScheduler<RenderedComponent> areaRotation = new ComponentsScheduler<>((component, aDouble)
+                -> backgroundArea.setRotationRadian(backgroundArea.getRotationRadian() + 0.001), 10);
+        areaRotation.add(backgroundArea);
+//        backgroundArea.setRotationRadian(3.14 / 4);
+//        backgroundArea.setShift(Vector.diag(0));
+    }
 
-
+    private void playWithReflection(Window<Long> window) {
+        DrawArea backgroundAreaReflection = window.allocateFullScreenArea();
+        DrawArea backgroundAreaReflection2 = window.allocateFullScreenArea();
+        DrawArea backgroundAreaReflection3 = window.allocateFullScreenArea();
+        backgroundAreaReflection.setZoom(new Vector(-1, -1));
+        backgroundAreaReflection2.setZoom(new Vector(1, -1));
+        backgroundAreaReflection3.setZoom(new Vector(-1, 1));
+        backgroundAreaReflection.addContext(secondaryRole);
+        backgroundAreaReflection.addContext(player);
+        backgroundAreaReflection2.addContext(secondaryRole);
+        backgroundAreaReflection2.addContext(player);
+        backgroundAreaReflection3.addContext(secondaryRole);
+        backgroundAreaReflection3.addContext(player);
+        backgroundAreaReflection.addContext(player);
+        backgroundAreaReflection2.addContext(player);
+        backgroundAreaReflection3.addContext(player);
     }
 
     private BrownianDriver createDriver(double speed, double twistExtent) {
@@ -163,7 +215,7 @@ public class Simulation {
 
 
     public void finish() {
-        for (Window window : windows) {
+        for (Window<? extends Long> window : windows) {
             window.close();
         }
         windows.clear();

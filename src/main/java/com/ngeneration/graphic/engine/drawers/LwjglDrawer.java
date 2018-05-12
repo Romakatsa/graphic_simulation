@@ -80,35 +80,45 @@ public class LwjglDrawer extends Drawer<Long> {
     }
 
     private void renderFrame() {
-        ReportBuilder.TreeReport report = new ReportBuilder.TreeReport();
+        ReportBuilder.TreeReport reportBuilder = new ReportBuilder.TreeReport();
+
         for (DrawArea area : window.getAreas()) {
             render(area, null);
+        }
+        for (DrawArea area : window.getAreas()) {
             for (DrawContext context : area.getContexts()) {
                 for (DrawContext.Layer layer : context.getLayers()) {
                     synchronized (layer.getComponents()) {
                         for (RenderedComponent component : layer.getComponents()) {
-                            report.append("AREA", area, 0);
-                            report.append(context.getName(), context, 1);
-                            report.append("layer#" + layer.getNumber(), layer, 2);
-                            report.append("" + component);
-                            render(component, area);
+                            updateReport(reportBuilder, area, context, layer, component);
+                            component.render(this, area);
+//                            render(component, area);
                         }
                     }
                 }
             }
         }
-        if (showGrid) {
-            showGrid();
-        }
+        showGrid();
+        report(reportBuilder);
+    }
+
+    private void report(ReportBuilder.TreeReport report) {
         if (
                 showReport
-                &&
-                (lastReportInstant == null
-                        || Duration.between(lastReportInstant, Instant.now()).compareTo(Duration.ofSeconds(5)) >= 0)
+                        &&
+                        (lastReportInstant == null
+                                || Duration.between(lastReportInstant, Instant.now()).compareTo(Duration.ofSeconds(5)) >= 0)
                 ) {
-            System.out.println(report.build());
+            report.print();
             lastReportInstant = Instant.now();
         }
+    }
+
+    private void updateReport(ReportBuilder.TreeReport report, DrawArea area, DrawContext context, DrawContext.Layer layer, RenderedComponent component) {
+        report.append("AREA", area, 0);
+        report.append(context.getName(), context, 1);
+        report.append("layer#" + layer.getNumber(), layer, 2);
+        report.append("" + component);
     }
 
     private Set<RenderedComponent> gridLines = new HashSet<>();
@@ -129,8 +139,10 @@ public class LwjglDrawer extends Drawer<Long> {
     }
 
     private void showGrid() {
-        for (RenderedComponent gridLine : gridLines) {
-            doRender(gridLine);
+        if (showGrid) {
+            for (RenderedComponent gridLine : gridLines) {
+                doRender(gridLine);
+            }
         }
     }
 

@@ -48,10 +48,13 @@ public class MathUtils {
         double y3 = p3.getY();
         double y4 = p4.getY();
         double xIntersection
-                = (x1 / (x2 - x1) * (y2 - y1) - y1
-                - x3 / (x4 - x3) * (y4 - y3) + y3)
-                / (1d / (x2 - x1) - 1 / (x4 - x3));
-        double yIntersection = (xIntersection - x1) / (x2 - x1) * (y2 - y1) + y1;
+                = (((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4))
+                / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)));
+//                = (x1 / (x2 - x1) * (y2 - y1) - y1
+//                - x3 / (x4 - x3) * (y4 - y3) + y3)
+//                / (1d / (x2 - x1) - 1d / (x4 - x3));
+        double yIntersection = (((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4))
+                / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)));
         if (Double.isNaN(xIntersection) || Double.isNaN(yIntersection)
                 || Double.isInfinite(xIntersection) || Double.isInfinite(yIntersection)) {
             return null;
@@ -65,10 +68,10 @@ public class MathUtils {
                             && (xIntersection <= p1.getX() || p2.getX() <= xIntersection))
                     ||
                     (p1.getY() > p2.getY()
-                            && (p1.getY() <= xIntersection || xIntersection <= p2.getY()))
+                            && (p1.getY() <= yIntersection || yIntersection <= p2.getY()))
                     ||
                     (p1.getY() < p2.getY()
-                            && (xIntersection <= p1.getY() || p2.getY() <= xIntersection))
+                            && (yIntersection <= p1.getY() || p2.getY() <= yIntersection))
                     ) {
                 return null;
             }

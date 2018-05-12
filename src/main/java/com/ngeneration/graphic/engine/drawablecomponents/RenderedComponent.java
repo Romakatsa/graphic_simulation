@@ -8,6 +8,7 @@ import com.ngeneration.graphic.engine.drawers.Console1DDrawer;
 import com.ngeneration.graphic.engine.drawers.Drawer;
 import com.ngeneration.graphic.engine.drawers.LwjglDrawer;
 import com.ngeneration.graphic.engine.enums.ColorEnum;
+import com.ngeneration.graphic.engine.view.DrawArea;
 import com.ngeneration.graphic.engine.view.DrawContext;
 
 import java.util.ArrayList;
@@ -45,12 +46,10 @@ public class RenderedComponent implements Cloneable {
     }
 
 
-//     TODO good idea, but need more time for design
-//    public void render() {
-//        if (visible) {
-//            drawer.render(this);
-//        }
-//    }
+    //     TODO good idea, but need more time for design
+    public <T> void render(Drawer<T> drawer, DrawArea area) {
+        drawer.render(this, area);
+    }
 
     public static <T> RenderedComponent map(T mappedEntity) {
         logger.warn("behaviour doesn't implemented");

@@ -6,8 +6,8 @@ import com.ngeneration.graphic.engine.view.Window;
 
 public abstract class Drawer<ID> {
 
-    public void render(RenderedComponent component, DrawArea holder) {
-        if (isDrawable(component)) {
+    public final void render(RenderedComponent component, DrawArea holder) {
+        if (component.isVisible() && isDrawable(component)) {
             RenderedComponent transformed = component;
             if(holder != null) {
                 transformed = transform(component, holder);
@@ -16,11 +16,11 @@ public abstract class Drawer<ID> {
         }
     }
 
+    protected abstract boolean isDrawable(RenderedComponent component);
+
     protected abstract RenderedComponent transform(RenderedComponent component, DrawArea holder);
 
     protected abstract void doRender(RenderedComponent component);
-
-    protected abstract boolean isDrawable(RenderedComponent component);
 
     public abstract ID createAndBindToWindow(Window<ID> window);
 

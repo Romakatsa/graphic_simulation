@@ -2,6 +2,7 @@ package com.ngeneration.graphic.engine;
 
 import com.ngeneration.graphic.engine.drawablecomponents.RenderedComponent;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -10,7 +11,7 @@ import java.util.function.BiConsumer;
 public class ComponentsScheduler<T extends RenderedComponent> { // todo the same interface as other schedulers. Or redesign this
     private static final int DEFAULT_INTERVAL_MILLIS = 10;
     private BiConsumer<T, Double> action;
-    private Set<T> components = new HashSet<>();
+    private final Set<T> components = Collections.synchronizedSet(new HashSet<>());
     private Thread thread; // todo manage thread amount. Should use static field ExecutorService?
     private boolean pause;
     private long intervalMillis;

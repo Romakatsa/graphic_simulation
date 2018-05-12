@@ -1,5 +1,6 @@
 package com.ngeneration.graphic.engine.view;
 
+import com.ngeneration.custom_rendered_components.Car;
 import com.ngeneration.graphic.engine.drawablecomponents.RenderedComponent;
 import com.ngeneration.graphic.engine.exceptions.ComponentAlreadyAddedException;
 import com.ngeneration.graphic.engine.exceptions.ComponentNotFoundException;
@@ -45,6 +46,10 @@ public class DrawContext {
             component.registerContext(this);
             getLayer(layer).putUp(component);
         }
+    }
+
+    public <T extends RenderedComponent> void put(int layer, Collection<T> components) throws ComponentAlreadyAddedException {
+        put(layer, components.toArray(new RenderedComponent[0]));
     }
 
     public void putDown(int layer, RenderedComponent... newComponents) throws ComponentAlreadyAddedException {

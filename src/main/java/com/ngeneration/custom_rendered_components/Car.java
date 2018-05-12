@@ -5,6 +5,10 @@ import com.ngeneration.graphic.engine.Shape;
 import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.drawablecomponents.PhysicalRenderedComponent;
 import com.ngeneration.graphic.engine.enums.ColorEnum;
+import com.ngeneration.graphic.engine.view.DrawContext;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Car extends PhysicalRenderedComponent {
     private Driver driver;
@@ -15,6 +19,7 @@ public class Car extends PhysicalRenderedComponent {
         this.speed = builder.speed;
         this.acceleration = builder.acceleration;
         this.driver = builder.driver;
+        builder.contexts.forEach((context, layerNumber) -> context.put(layerNumber, this));
     }
 
     public static class Builder {
@@ -28,6 +33,7 @@ public class Car extends PhysicalRenderedComponent {
         Vector speed;
         Vector acceleration;
         Driver driver;
+        Map<DrawContext, Integer> contexts = new HashMap<>();
 
         public Builder withPosition(Vector position) {
             this.position = position;
@@ -81,6 +87,11 @@ public class Car extends PhysicalRenderedComponent {
 
         public Car build() {
             return new Car(this);
+        }
+
+        public Builder putInContext(int layerNumber, DrawContext context) {
+            contexts.put(context, layerNumber);
+            return this;
         }
     }
 }

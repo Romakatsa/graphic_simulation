@@ -12,9 +12,12 @@ public class ReportBuilder {
         private final StringBuilder stringBuilder = new StringBuilder();
         //        private StringBuilder lastSubTreeString = new StringBuilder();
         private List<String> subTreeMsgs = new ArrayList<>();
-
+        private volatile boolean finished;
 
         public void append(String string, Object o, int level) {
+            if (finished) {
+                throw new IllegalStateException("Report is built already. You can't append data to built report.");
+            }
             Object previousValue = map.put(level, o);
             if (previousValue != o) {
                 subTreeMsgs.add(level, string);
@@ -23,6 +26,9 @@ public class ReportBuilder {
         }
 
         public void append(String string) {
+            if (finished) {
+                throw new IllegalStateException("Report is built already. You can't append data to built report.");
+            }
             for (int i = 0; i < subTreeMsgs.size(); i++) {
                 if (!subTreeMsgs.get(i).isEmpty()) {
                     stringBuilder.append(tabs(i)).append(subTreeMsgs.get(i)).append("\n");
@@ -53,11 +59,19 @@ public class ReportBuilder {
             }
         }
 
-        public String build() {
+        public synchronized String build() {
+            if (finished) {
+                throw new IllegalStateException("Report is built already. You can't build such report.");
+            }
+            finished = true;
             if (stringBuilder.length() > 0) {
                 stringBuilder.insert(0, "==============================================================\n");
             }
             return stringBuilder.toString();
+        }
+
+        public void print() {
+            System.out.println(this.build());
         }
     }
 }

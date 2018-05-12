@@ -7,8 +7,8 @@ public enum ColorEnum {
   BLUE(0.223f, 0.733f, 0.168f),
   GREEN(0.168f, 0.223f, 0.733f),
 
-  DARK_RED(0.4, 0.05, 0.05), DARK_GREEN(0.068f, 0.423f, 0.333f)
-  ;
+  DARK_RED(0.4, 0.05, 0.05), DARK_GREEN(0.068f, 0.423f, 0.333f),
+    DARK_BLUE(0.05, 0.05, 0.4f);
 
   private double red;
   private double green;
