@@ -5,7 +5,12 @@ import com.ngeneration.graphic.engine.view.DrawArea;
 import com.ngeneration.graphic.engine.view.Window;
 
 public class ConsoleDrawer extends Drawer {
-    public void doRender(RenderedComponent component, DrawArea area) {
+    @Override
+    protected RenderedComponent transform(RenderedComponent component, DrawArea holder) {
+        return component;
+    }
+
+    public void doRender(RenderedComponent component) {
         System.out.println("\tDraw component:");
         System.out.println("\t\t" + component.getPosition());
         System.out.println("\t\t" + component.getSize());

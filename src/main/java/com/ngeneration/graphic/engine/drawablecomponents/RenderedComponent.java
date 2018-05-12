@@ -19,6 +19,7 @@ import java.util.function.Supplier;
 public class RenderedComponent implements Cloneable {
     private static final LazyLogger logger = LazyLogger.getLogger(RenderedComponent.class);
 
+    protected String name;
     protected Vector position;
     protected Vector size;
     protected Shape shapes;
@@ -33,6 +34,16 @@ public class RenderedComponent implements Cloneable {
 
     protected Supplier<Boolean> isComponentAlreadyNeed = () -> true; //TODO elaborate on
     protected List<ComponentsScheduler> schedulers = new ArrayList<>();
+
+    public RenderedComponent(Vector position, Vector size, double rotation, ColorEnum colors, double opacity, Shape shapes) {
+        this.position = position;
+        this.size = size;
+        this.shapes = shapes;
+        this.colors = colors;
+        this.rotation = rotation;
+        this.opacity = opacity;
+    }
+
 
 //     TODO good idea, but need more time for design
 //    public void render() {
@@ -147,4 +158,11 @@ public class RenderedComponent implements Cloneable {
         this.opacity = opacity;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

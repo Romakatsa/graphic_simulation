@@ -1,5 +1,6 @@
 package com.ngeneration.graphic.engine.drawers;
 
+import com.ngeneration.graphic.engine.Shape;
 import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.drawablecomponents.RenderedComponent;
 import com.ngeneration.graphic.engine.enums.ColorEnum;
@@ -9,10 +10,17 @@ import com.ngeneration.graphic.engine.view.DrawArea;
 import com.ngeneration.graphic.engine.view.DrawContext;
 import com.ngeneration.graphic.engine.view.Window;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
+
 public class LwjglDrawer extends Drawer<Long> {
     private Window<Long> window;
     private LwjglGraphicEngine engine = new LwjglGraphicEngine();
     private boolean cleanScreenBeforeDrawing = true;
+    private boolean showGrid = true;
+    private boolean showReport = false;
     //    private Condition shouldCreateWindow = lock.newCondition();
     //    private Condition shouldDraw = lock.newCondition();
     //    private Condition windowIsCreated = lock.newCondition();
@@ -24,6 +32,7 @@ public class LwjglDrawer extends Drawer<Long> {
     private boolean shouldCreateWindow = false;
     private boolean shouldDraw = false;
     private boolean windowIsCreated = false;
+    private Instant lastReportInstant = null;
 
     public LwjglDrawer() {
 //        this.window = window;
@@ -72,8 +81,8 @@ public class LwjglDrawer extends Drawer<Long> {
 
     private void renderFrame() {
         ReportBuilder.TreeReport report = new ReportBuilder.TreeReport();
-//        StringBuilder report = new StringBuilder("===================== NEW FRAME =====================\n");
         for (DrawArea area : window.getAreas()) {
+            render(area, null);
             for (DrawContext context : area.getContexts()) {
                 for (DrawContext.Layer layer : context.getLayers()) {
                     synchronized (layer.getComponents()) {
@@ -82,71 +91,100 @@ public class LwjglDrawer extends Drawer<Long> {
                             report.append(context.getName(), context, 1);
                             report.append("layer#" + layer.getNumber(), layer, 2);
                             report.append("" + component);
-
-// TODO color
-
-                            showAreaBounds(area);
                             render(component, area);
                         }
                     }
                 }
             }
         }
-        System.out.println(report.build());
-    }
-
-    private void showAreaBounds(DrawArea area) {
-        RenderedComponent areaBounds1 = new RenderedComponent();
-        RenderedComponent areaBounds2 = new RenderedComponent();
-        RenderedComponent areaBounds3 = new RenderedComponent();
-        RenderedComponent areaBounds4 = new RenderedComponent();
-        areaBounds1.setPosition(area.getShift().plus(new Vector(50, 0)));
-        areaBounds2.setPosition(area.getShift().plus(new Vector(-50, 0)));
-        areaBounds3.setPosition(area.getShift().plus(new Vector(0, 50)));
-        areaBounds4.setPosition(area.getShift().plus(new Vector(0, -50)));
-        areaBounds3.setSize(new Vector(1, area.getZoomFactor().getY()*100));
-        areaBounds4.setSize(new Vector(1, area.getZoomFactor().getY()*100));
-        areaBounds1.setSize(new Vector(area.getZoomFactor().getX()*100, 1));
-        areaBounds2.setSize(new Vector(area.getZoomFactor().getX()*100, 1));
-        showAreaBounds(areaBounds1);
-        showAreaBounds(areaBounds2);
-        showAreaBounds(areaBounds3);
-        showAreaBounds(areaBounds4);
-        render(areaBounds1, area);
-        render(areaBounds2, area);
-        render(areaBounds3, area);
-        render(areaBounds4, area);
-    }
-    private void showAreaBounds(RenderedComponent bound) {
-        bound.setColors(ColorEnum.GREEN);
-    }
-
-
-    public void render(RenderedComponent component, DrawArea area) {
-        if (isDrawable(component)) {
-            doRender(component, area);
+        if (showGrid) {
+            showGrid();
+        }
+        if (
+                showReport
+                &&
+                (lastReportInstant == null
+                        || Duration.between(lastReportInstant, Instant.now()).compareTo(Duration.ofSeconds(5)) >= 0)
+                ) {
+            System.out.println(report.build());
+            lastReportInstant = Instant.now();
         }
     }
 
-    protected void doRender(RenderedComponent component, DrawArea area) {
+    private Set<RenderedComponent> gridLines = new HashSet<>();
+
+    {
+        int sectionNumber = 10;
+        double width = 0.2;
+        ColorEnum color = ColorEnum.DARK_GREEN;
+        double opacity = 0.8;
+        for (int i = 0; i <= sectionNumber; i++) {
+            gridLines.add(new RenderedComponent(new Vector(0, i * (100 / sectionNumber) - 50),
+                    new Vector(width, 100), 0, color, opacity, Shape.RECT));
+        }
+        for (int i = 0; i <= sectionNumber; i++) {
+            gridLines.add(new RenderedComponent(new Vector(i * (100 / sectionNumber) - 50, 0),
+                    new Vector(100, width), 0, color, opacity, Shape.RECT));
+        }
+    }
+
+    private void showGrid() {
+        for (RenderedComponent gridLine : gridLines) {
+            doRender(gridLine);
+        }
+    }
+
+    @Override
+    protected RenderedComponent transform(RenderedComponent component, DrawArea holder) {
+        if (holder == null) {
+            return component;
+        }
+        Vector position
+                = transformPosition(component, holder);
+        Vector size
+                = transformSize(component, holder);
+        double rotation
+                = transformRotation(component, holder);
+        return new RenderedComponent(position, size, rotation,
+                component.getColors(), component.getOpacity(), component.getShapes());
+    }
+
+    protected void doRender(RenderedComponent component) {
 //        component.render();
 //        System.out.println("Draw: " + component);
 //        AssertUtils.notNull(component.getPosition());
 //        AssertUtils.notNull(component.getSize());
         if (component.getPosition() != null
                 && component.getSize() != null) {
-            Vector position
-                    = renderPosition(component.getPosition(), area.getZoomFactor(), area.getShift());
-            engine.render(position.getX(),
-                    position.getY(),
-                    component.getSize().getX() * area.getZoomFactor().getX(),
-                    component.getSize().getY() * area.getZoomFactor().getY(),
-                    component.getRotation(), component.getColors(), component.getShapes());
+            engine.render(component.getPosition().getX(),
+                    component.getPosition().getY(),
+                    component.getSize().getX(),
+                    component.getSize().getY(),
+                    component.getRotation(), component.getColors(), component.getShapes(), component.getOpacity());
         }
     }
 
-    private Vector renderPosition(Vector position, Vector zoom, Vector shift) {
-        return position.coordinatewiseMultiplication(zoom).plus(shift).plus(Vector.diag(50));
+    private Vector transformPosition(RenderedComponent component, DrawArea area) {
+        Vector componentPosition = component.getPosition();
+//        Vector componentSize = component.getSize();
+        double areaRotation = area.getRotationRadian();
+        Vector zoom = area.getZoomFactor();
+        Vector shift = area.getShift();
+        Vector.PolarCoordinateSystemVector polar
+                = componentPosition//.coordinatewiseMultiplication(zoom).plus(shift)
+                .toPolar();
+        polar.setRadian(polar.getRadian() + areaRotation);
+        Vector transformedPosition = polar.toFlatCartesianVector().coordinatewiseMultiplication(zoom).plus(shift);
+//        Vector transformedPosition = polar.toFlatCartesianVector();
+        return transformedPosition;
+    }
+
+    private Vector transformSize(RenderedComponent component, DrawArea area) {
+        return component.getSize().coordinatewiseMultiplication(area.getZoomFactor());
+    }
+
+    private double transformRotation(RenderedComponent component, DrawArea area) {
+        return component.getRotation() + area.getRotationRadian();
     }
 
     protected boolean isDrawable(RenderedComponent component) {

@@ -6,7 +6,7 @@ import com.ngeneration.graphic.engine.Vector;
 public class DummyDriver implements Driver {
 
     @Override
-    public void accept(Car component) {
+    public void accept(Car component, Double deltaTime) {
         component.setRotation(0);
         component.setSpeed(Vector.diag(10));
     }

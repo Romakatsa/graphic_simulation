@@ -38,15 +38,18 @@ public class ComponentsFactory {
 
     public static Road.Builder aDirectRoad() {
         return new Road.Builder()
-                .firstBoundPoint(com.ngeneration.graphic.engine.Vector.diag(1))
-                .nextBoundPoint(com.ngeneration.graphic.engine.Vector.diag(2))
-                .nextBoundPoint(com.ngeneration.graphic.engine.Vector.diag(3))
-                .nextBoundPoint(com.ngeneration.graphic.engine.Vector.diag(4))
-                .nextBoundPoint(com.ngeneration.graphic.engine.Vector.diag(5))
-                .firstBoundPoint(new Vector(4, 0))
-                .nextBoundPoint(new Vector(4, 10))
-                .firstBoundPoint(new Vector(6, 0))
-                .nextBoundPoint(new Vector(6, 10));
+//                .firstBoundPoint(com.ngeneration.graphic.engine.Vector.diag(1))
+//                .nextBoundPoint(com.ngeneration.graphic.engine.Vector.diag(2))
+//                .nextBoundPoint(com.ngeneration.graphic.engine.Vector.diag(3))
+//                .nextBoundPoint(com.ngeneration.graphic.engine.Vector.diag(4))
+//                .nextBoundPoint(com.ngeneration.graphic.engine.Vector.diag(5))
+                .firstBoundPoint(new Vector(-50, 10))
+                .nextBoundPoint(new Vector(50, 10))
+                .firstBoundPoint(new Vector(-50, -10))
+                .nextBoundPoint(new Vector(50, -10))
+//                .firstBoundPoint(new Vector(6, 0))
+//                .nextBoundPoint(new Vector(6, 10))
+        ;
     }
 
     public static Set<RenderedComponent> populate(RenderedComponent component, int number) {
@@ -76,5 +79,12 @@ public class ComponentsFactory {
             e.printStackTrace();
         }
         return components;
+    }
+
+    public static class UniformPopulator<T extends RenderedComponent> implements BiConsumer<T, Integer> {
+        @Override
+        public void accept(T component, Integer iteration) {
+            component.setPosition(new Vector(10 * (iteration / 10), 10 * (iteration % 10)));
+        }
     }
 }

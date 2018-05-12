@@ -2,7 +2,7 @@ package com.ngeneration.graphic.engine.commands;
 
 import com.ngeneration.graphic.engine.view.DrawContext;
 
-public class ActivateContextCommand extends Command {
+public class ActivateContextCommand implements Runnable, Command {
 
     protected DrawContext context;
 
@@ -10,7 +10,6 @@ public class ActivateContextCommand extends Command {
         this.context = context;
     }
 
-    @Override
     public void run() {
         context.setActivated(true);
     }

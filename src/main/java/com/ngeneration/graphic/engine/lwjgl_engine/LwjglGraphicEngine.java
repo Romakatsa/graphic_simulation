@@ -38,6 +38,9 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
         glfwDefaultWindowHints(); // optional, the current window hints are already the default
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
+//        drawTransparentContent();
+//        glDisable(GL_BLEND);
+//        drawNonTransparentContent();
     }
 
     @Override
@@ -72,7 +75,7 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
             // Center the window
             glfwSetWindowPos(
                     windowId,
-                    (vidmode.width() - pWidth.get(0)) / 2,
+                    vidmode.width() - pWidth.get(0) / 2,
                     (vidmode.height() - pHeight.get(0)) / 2
             );
         } // the stack frame is popped automatically
@@ -98,6 +101,9 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
 
         // Set the clear color
         GL11.glClearColor((float) background.getRed(), (float) background.getGreen(), (float) background.getBlue(), (float) 0);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         return windowId;
     }
 
@@ -105,7 +111,8 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
     public void closeWindow(Long id) {
         // Free the window callbacks and destroy the window
         glfwFreeCallbacks(id);
-        glfwDestroyWindow(id);
+//        glfwDestroyWindow(id);
+        glfwSetWindowShouldClose(id, true);
     }
 
     @Override
@@ -114,14 +121,14 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
     }
 
     @Override
-    public void render(double x, double y, double sx, double sy, double rotate, ColorEnum color, Shape shape) {
+    public void render(double x, double y, double sx, double sy, double rotate, ColorEnum color, Shape shape, double opacity) {
         //TODO decouple shape drawing
-        x = x / 50 - 1;
-        y = y / 50 - 1;
+        x = x / 50 - 0;
+        y = y / 50 - 0;
         sx = sx / 50 * 1; // TODO this factor define window proportion
         sy = sy / 50 * 1;
         glPushMatrix();
-        chooseColor(color, 0f);
+        chooseColor(color, 1-opacity);
         glTranslated(x, y, 0);
         glRotated((rotate - Math.PI / 2) * 180 / Math.PI, 0, 0, 1);
         x = 0;

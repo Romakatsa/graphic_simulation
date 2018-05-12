@@ -5,7 +5,12 @@ import com.ngeneration.graphic.engine.view.DrawArea;
 import com.ngeneration.graphic.engine.view.Window;
 
 public class Console1DDrawer extends Drawer {
-    public void doRender(RenderedComponent component, DrawArea area) {
+    @Override
+    protected RenderedComponent transform(RenderedComponent component, DrawArea holder) {
+        return component;
+    }
+
+    public void doRender(RenderedComponent component) {
         double position = component.getPosition().getX();
         for (int i = 0; i < Math.abs(position / 10); i++) {
             System.out.print(".");

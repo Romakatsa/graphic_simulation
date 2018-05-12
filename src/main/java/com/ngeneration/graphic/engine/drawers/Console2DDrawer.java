@@ -14,7 +14,12 @@ public class Console2DDrawer extends Drawer {
     }
 
     @Override
-    public void doRender(RenderedComponent component, DrawArea area) {
+    protected RenderedComponent transform(RenderedComponent component, DrawArea holder) {
+        return component;
+    }
+
+    @Override
+    public void doRender(RenderedComponent component) {
         double x = Math.abs(component.getPosition().getX());
         double y = Math.abs(component.getPosition().getY());
         int resolution = 20;

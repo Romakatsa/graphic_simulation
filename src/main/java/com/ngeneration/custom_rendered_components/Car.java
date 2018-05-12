@@ -10,13 +10,8 @@ public class Car extends PhysicalRenderedComponent {
     private Driver driver;
 
     Car(Builder builder) {
-        this.position = builder.position;
-        this.size = builder.size;
-        this.shapes = builder.shapes;
-        this.colors = builder.colors;
-        this.rotation = builder.rotation;
+        super(builder.position, builder.size, builder.rotation, builder.colors, builder.opacity, builder.shapes);
         this.visible = builder.visible;
-        this.opacity = builder.opacity;
         this.speed = builder.speed;
         this.acceleration = builder.acceleration;
         this.driver = builder.driver;

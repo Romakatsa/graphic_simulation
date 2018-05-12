@@ -11,7 +11,7 @@ public interface GraphicEngine<ID> {
 
     void beforeFrame();
 
-    void render(double x, double y, double sx, double sy, double rotate, ColorEnum color, Shape shape);
+    void render(double x, double y, double sx, double sy, double rotate, ColorEnum color, Shape shape, double opacity);
 
     void afterFrame(ID id);
 

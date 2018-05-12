@@ -6,13 +6,19 @@ import com.ngeneration.graphic.engine.view.Window;
 
 public abstract class Drawer<ID> {
 
-    public void render(RenderedComponent component, DrawArea area) {
+    public void render(RenderedComponent component, DrawArea holder) {
         if (isDrawable(component)) {
-            doRender(component, area);
+            RenderedComponent transformed = component;
+            if(holder != null) {
+                transformed = transform(component, holder);
+            }
+            doRender(transformed);
         }
     }
 
-    protected abstract void doRender(RenderedComponent component, DrawArea area);
+    protected abstract RenderedComponent transform(RenderedComponent component, DrawArea holder);
+
+    protected abstract void doRender(RenderedComponent component);
 
     protected abstract boolean isDrawable(RenderedComponent component);
 

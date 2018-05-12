@@ -20,7 +20,9 @@ public class SpringStarterExample {
 
     public static void main(String[] args) {
 //        SpringApplication.run(SpringStarterExample.class, args);
-        new Simulation().start();
+        Simulation simulation = new Simulation();
+        simulation.init();
+        simulation.start();
     }
 
     @Bean
