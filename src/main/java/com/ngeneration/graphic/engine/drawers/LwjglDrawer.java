@@ -17,7 +17,7 @@ import java.util.Set;
 
 public class LwjglDrawer extends Drawer<Long> {
     private Window<Long> window;
-    private LwjglGraphicEngine engine = new LwjglGraphicEngine();
+    private LwjglGraphicEngine engine = LwjglGraphicEngine.getInstance();
     private boolean cleanScreenBeforeDrawing = true;
     private boolean showGrid = true;
     private boolean showReport = false;
@@ -82,16 +82,19 @@ public class LwjglDrawer extends Drawer<Long> {
     private void renderFrame() {
         ReportBuilder.TreeReport reportBuilder = new ReportBuilder.TreeReport();
 
+//        for (DrawArea area : window.getAreas()) {
+//            render(area, null);
+//        }
         for (DrawArea area : window.getAreas()) {
-            render(area, null);
-        }
-        for (DrawArea area : window.getAreas()) {
+            area.render(this, null);
             for (DrawContext context : area.getContexts()) {
                 for (DrawContext.Layer layer : context.getLayers()) {
                     synchronized (layer.getComponents()) {
                         for (RenderedComponent component : layer.getComponents()) {
                             updateReport(reportBuilder, area, context, layer, component);
-                            component.render(this, area);
+                            if (area.withinAreaBounds(component.getPosition())) {
+                                component.render(this, area);
+                            }
 //                            render(component, area);
                         }
                     }
@@ -179,9 +182,9 @@ public class LwjglDrawer extends Drawer<Long> {
     private Vector transformPosition(RenderedComponent component, DrawArea area) {
         Vector componentPosition = component.getPosition();
 //        Vector componentSize = component.getSize();
-        double areaRotation = area.getRotationRadian();
-        Vector zoom = area.getZoomFactor();
-        Vector shift = area.getShift();
+        double areaRotation = area.getRotationRadian() ;//+ area.getRotation();
+        Vector zoom = area.getZoomFactor().coordinatewiseMultiplication(area.getSize().divide(100));
+        Vector shift = area.getShift().plus(area.getPosition());
         Vector.PolarCoordinateSystemVector polar
                 = componentPosition//.coordinatewiseMultiplication(zoom).plus(shift)
                 .toPolar();
@@ -192,7 +195,8 @@ public class LwjglDrawer extends Drawer<Long> {
     }
 
     private Vector transformSize(RenderedComponent component, DrawArea area) {
-        return component.getSize().coordinatewiseMultiplication(area.getZoomFactor());
+        return component.getSize().coordinatewiseMultiplication(area.getZoomFactor())
+                .coordinatewiseMultiplication(area.getSize().divide(100));
     }
 
     private double transformRotation(RenderedComponent component, DrawArea area) {

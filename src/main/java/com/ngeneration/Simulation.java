@@ -5,6 +5,7 @@ import com.ngeneration.ai.IntelligentDriver;
 import com.ngeneration.custom_rendered_components.Car;
 import com.ngeneration.custom_rendered_components.Road;
 import com.ngeneration.graphic.engine.ComponentsScheduler;
+import com.ngeneration.graphic.engine.PlaceOnScreen;
 import com.ngeneration.graphic.engine.ThreeVector;
 import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.commands.BrownianDriverCommand;
@@ -29,8 +30,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.ngeneration.ComponentsFactory.*;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_Q;
+import static org.lwjgl.glfw.GLFW.*;
 
 public class Simulation {
 
@@ -48,6 +48,7 @@ public class Simulation {
     private ControlPanelController controlPanelController;
     private DrawArea backgroundArea;
     private Window<Long> mainWindow;
+    private DrawArea mapArea;
 
     public void init() {
         System.out.println("Init Simulation. . .");
@@ -95,16 +96,19 @@ public class Simulation {
 //        List<Car> population = new PopulationBuilder<Car>()
 //                .withName(new SimpleNameGenerator<>())
 //                .populate(10);
-        Set<Car> bigCarPopulation = populate(bigCar, 10,
-                new UniformPopulator<>(),
-                new SimpleNameGenerator<>(),
-                new BindingWithScheduler<>(loop, physics),
-                (curCar, iteration) -> addSchedulers(curCar, driver)
-        );
         Set<Car> miniCarPopulation = populate(miniCar, 1,
                 new FixedPositionPopulator<>(-50, 0),
                 new SimpleNameGenerator<>(),
                 new BindingWithScheduler<>(loop, physics),
+                (curCar, iteration) -> {
+                    ComponentsScheduler<DrawArea> scheduler = new ComponentsScheduler<>((area, value)
+                            -> {
+                        area.setRotationRadian(-curCar.getRotation() + Math.PI / 2);
+//                        area.setShift(curCar.getPosition()//.coordinatewiseMultiplication(area.getZoomFactor())
+//                                .multiple(-1));
+                    }, 20);
+                    scheduler.add(mapArea);
+                },
                 (curCar, iteration) -> {
                     IntelligentDriver intelligentDriver = new IntelligentDriver(road, aiViewContext);
                     addSchedulers(curCar,
@@ -114,28 +118,55 @@ public class Simulation {
                     );
                 }
         );
+        Set<Car> bigCarPopulation = populate(bigCar, 10,
+                new UniformPopulator<>(),
+                new SimpleNameGenerator<>(),
+                new BindingWithScheduler<>(loop, physics),
+                (curCar, iteration) -> addSchedulers(curCar, driver)
+        );
 
 
         player.put(10, bigCarPopulation);
         player.put(10, miniCarPopulation);
         secondaryRole.put(5, road);
 
-        mainWindow.addKeyboardEvent(new KeyboardEvent(() -> {
-            System.out.println("left please");
-        }, ActionType.CLICKED,
-                GLFW_KEY_LEFT));
-//        mainWindow.addKeyboardEvent(
-//                new KeyboardEvent(() -> {
-//                    System.out.println("left please");
-//                    backgroundArea.setShift(new Vector(-1, 0));
-//                },
-//                        ActionType.CLICKED, GLFW_KEY_LEFT));
-
-        mainWindow.addKeyboardEvent(new KeyboardEvent(() -> System.out.print("Go sleep..."), ActionType.CLICKED,
-                GLFW_KEY_LEFT));
+        mapArea.setSize(Vector.diag(40));
+        mapArea.setZoom(Vector.diag(0.5));
+//        mapArea.setPosition( mapArea.getSize().divide(2).plus(Vector.diag(-50)));
+//        mapArea.setVisible(false);
+        addInputCommands();
         // Simulation
         System.out.println("Start simulation plot");
         simulationPlot();
+    }
+
+    private void addInputCommands() {
+        double updatesPerSecond = 100;
+        mainWindow.addKeyboardEvent(new KeyboardEvent(()
+                -> backgroundArea.setShift(
+                new Vector(backgroundArea.getShift().getX() + 0.1 / updatesPerSecond,
+                        backgroundArea.getShift().getY())),
+                ActionType.CLICKED, GLFW_KEY_LEFT));
+        mainWindow.addKeyboardEvent(new KeyboardEvent(()
+                -> backgroundArea.setShift(
+                new Vector(backgroundArea.getShift().getX() - 0.1 / updatesPerSecond,
+                        backgroundArea.getShift().getY())),
+                ActionType.CLICKED, GLFW_KEY_RIGHT));
+        mainWindow.addKeyboardEvent(new KeyboardEvent(()
+                -> backgroundArea.setShift(
+                new Vector(backgroundArea.getShift().getX(),
+                        backgroundArea.getShift().getY() - 0.1 / updatesPerSecond)),
+                ActionType.CLICKED, GLFW_KEY_UP));
+        mainWindow.addKeyboardEvent(new KeyboardEvent(()
+                -> backgroundArea.setShift(
+                new Vector(backgroundArea.getShift().getX(),
+                        backgroundArea.getShift().getY() + 0.1 / updatesPerSecond)),
+                ActionType.CLICKED, GLFW_KEY_DOWN));
+        mainWindow.addKeyboardEvent(new KeyboardEvent(()
+                -> {
+            //TODO show report
+        },
+                ActionType.CLICKED, GLFW_KEY_I));
     }
 
     private void simulationPlot() {
@@ -149,10 +180,11 @@ public class Simulation {
     }
 
     private void initGraphic() {
-        GraphicEngine<Long> engine = new LwjglGraphicEngine();
+        GraphicEngine<Long> engine = LwjglGraphicEngine.getInstance();
         mainWindow = Window.<Long>create("Simulation", 800, 800, engine);
         windows.add(mainWindow);
         backgroundArea = mainWindow.allocateFullScreenArea();
+        mapArea = mainWindow.allocateArea(PlaceOnScreen.BOTTOM_LEFT_CORNER, 0.3, 0.3);
         secondaryRole = new DrawContext("secondary");
         player = new DrawContext("player");
         aiViewContext = new DrawContext("ai");
@@ -162,6 +194,8 @@ public class Simulation {
         backgroundArea.addContext(secondaryRole);
         backgroundArea.addContext(player);
         backgroundArea.addContext(aiViewContext);
+        mapArea.addContext(secondaryRole);
+        mapArea.addContext(player);
     }
 
     private void playWithAreaRotation(DrawArea backgroundArea) {

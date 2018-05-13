@@ -164,4 +164,9 @@ public class RenderedComponent implements Cloneable {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return "Component: " + position + ", " + size;
+    }
 }

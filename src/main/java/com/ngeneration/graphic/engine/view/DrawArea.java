@@ -17,11 +17,11 @@ public abstract class DrawArea extends RenderedComponent implements AutoCloseabl
     protected double rotationRadian;
 
     public DrawArea(Window holderWindow) {
-        super(Vector.zero(), Vector.diag(100), 0, ColorEnum.GREEN, 0.7, Shape.RECT);
+        super(Vector.zero(), Vector.diag(100), 0, ColorEnum.WHITE, 0, Shape.RECT);
         this.holderWindow = holderWindow;
     }
 
-    protected abstract boolean withinAreaBounds(Vector position);
+    public abstract boolean withinAreaBounds(Vector position);
 
     public List<DrawContext> getContexts() {
         return contexts;

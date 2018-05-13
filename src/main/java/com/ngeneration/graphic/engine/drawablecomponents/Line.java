@@ -10,7 +10,7 @@ public class Line extends RenderedComponent {
 
     public Line(Vector beginPoint, Vector endPoint, double width, ColorEnum colors, double opacity) {
         this(beginPoint.plus(endPoint.minus(beginPoint).divide(2)),
-                new Vector(width, beginPoint.minus(endPoint).module()),
+                new Vector(width, beginPoint.minus(endPoint).module() + width),
                 colors, beginPoint.minus(endPoint).toPolar().getRadian(), opacity);
     }
 

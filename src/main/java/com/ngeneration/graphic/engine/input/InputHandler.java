@@ -99,7 +99,6 @@ public class InputHandler {
 //        System.out.println("updateKeyboardEventsType: " + System.identityHashCode(keyboardEventsForAdding) + ": " + keyboardEventsForAdding.size());
         keyboardEvents.addAll(keyboardEventsForAdding);
         for (KeyboardEvent event : keyboardEvents) {
-            System.out.println("LwjglGraphicEngine.addKeyboardEvent");
             boolean keysPressed = true;
             for (int key : event.getKeys()) {
 //                    System.out.println("key = " + key);
@@ -206,8 +205,6 @@ public class InputHandler {
 
     public void listenkeyboardEvent() {
         for (KeyboardEvent event : keyboardEvents) {
-            System.out.println("InputHandler.listenkeyboardEvent");
-            System.out.println(event.getLastActionTime());
             if (Arrays.stream(event.getKeys()).allMatch(keyboard::isKeyDown)) {
             }
             if (//Arrays.stream(event.getKeys()).allMatch(keyboard::isKeyDown)

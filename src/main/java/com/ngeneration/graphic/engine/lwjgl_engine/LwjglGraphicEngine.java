@@ -22,6 +22,17 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class LwjglGraphicEngine implements GraphicEngine<Long> {
+    private static LwjglGraphicEngine instance;
+
+    public static synchronized LwjglGraphicEngine getInstance() {
+        if (instance == null) {
+            instance = new LwjglGraphicEngine();
+        }
+        return instance;
+    }
+
+    private LwjglGraphicEngine() {
+    }
 
     private boolean initialized = false;
     private boolean started = false;
@@ -258,7 +269,6 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
 //                    GLFW_KEY_Q));
 //            inputHandler.createKeyboardEvent(new KeyboardEvent(() -> System.out.print("."), ActionType.CLICKED,
 //                    GLFW_KEY_LEFT));
-            System.out.println("hash: " + System.identityHashCode(inputHandler));
             while (true) {
                 try {
                     inputHandler.listenkeyboardEvent();
@@ -278,7 +288,6 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
     }
 
     public void addKeyboardEvent(KeyboardEvent event) {
-        System.out.println("hash: " + System.identityHashCode(inputHandler));
         inputHandler.createKeyboardEvent(event);
     }
 
