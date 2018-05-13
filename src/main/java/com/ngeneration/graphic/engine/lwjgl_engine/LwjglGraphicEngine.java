@@ -1,16 +1,18 @@
 package com.ngeneration.graphic.engine.lwjgl_engine;
 
 import com.ngeneration.graphic.engine.Shape;
+import com.ngeneration.graphic.engine.ThreeVector;
 import com.ngeneration.graphic.engine.drawers.Drawer;
 import com.ngeneration.graphic.engine.drawers.LwjglDrawer;
 import com.ngeneration.graphic.engine.enums.ColorEnum;
-import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWVidMode;
+import com.ngeneration.graphic.engine.input.*;
+import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.IntBuffer;
+import java.util.concurrent.TimeUnit;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -24,6 +26,10 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
     private boolean initialized = false;
     private boolean started = false;
     private boolean pause = false;
+
+    private final Mouse mouse = new Mouse();
+    private final Keyboard keyboard = new Keyboard();
+    private final InputHandler inputHandler = new InputHandler(mouse, keyboard);
 
     private synchronized void init() {
         // Setup an error callback. The default implementation
@@ -104,6 +110,7 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        enableInputHandling(width, height, windowId);
         return windowId;
     }
 
@@ -128,7 +135,7 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
         sx = sx / 50 * 1; // TODO this factor define window proportion
         sy = sy / 50 * 1;
         glPushMatrix();
-        chooseColor(color, 1-opacity);
+        chooseColor(color, 1 - opacity);
         glTranslated(x, y, 0);
         glRotated((rotate - Math.PI / 2) * 180 / Math.PI, 0, 0, 1);
         x = 0;
@@ -182,6 +189,101 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
             default:
                 glColor4d(color.getRed(), color.getGreen(), color.getBlue(), opacity);
         }
+    }
+
+    // TODO refactor it, it's just copy from old version
+    private void enableInputHandling(int width, int height, long windowId) {
+        // Setup a key callback. It will be called every time a key is pressed, repeated or released.
+        glfwSetKeyCallback(windowId, (window, key, scancode, action, mods) -> {
+            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
+                glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
+            else {
+                keyboard.put(key, action);
+            }
+        });
+
+        glfwSetMouseButtonCallback(windowId, GLFWMouseButtonCallback.create((window, button, action, mods) -> {
+            System.out.println("smth");
+            if (button == 0 && action > 0) {
+                mouse.setLastMousePosition(new ThreeVector(mouse.getX(), mouse.getY(), 0));
+            } else if (button == 0 && action == 0) {
+                mouse.setLastMousePosition(null);
+            }
+            if (button == 0) {
+                mouse.setLeftButtonDown(action > 0);
+            }
+            if (button == 1) {
+                mouse.setRightButtonDown(action > 0);
+            }
+            if (button == 2) {
+                mouse.setCenterButtonDown(action > 0);
+            }
+        }));
+
+        glfwSetCursorPosCallback(windowId, GLFWCursorPosCallback.create((window, xpos, ypos) -> {
+            mouse.setX(xpos / width * 100);
+            mouse.setY(100 - ypos / height * 100);
+        }));
+
+//        glfwSetScrollCallback(windowId, GLFWScrollCallback.create((l, v, v1) -> {
+//            double factor = 10;
+//            if (v1 == 1) {
+//                display.setScale(display.getScale().multiple(
+//                        1 + ((factor - 1) * display.getDeltaTime())));
+//            } else {
+//                display.setScale(display.getScale().multiple(
+//                        1 - 5 * display.getDeltaTime()
+////                         1-((1-1d / (factor-1)) * display.getDeltaTime())
+//                ));
+//            }
+//        }));
+        Thread inputListener = new Thread(() -> {
+            while (true) {
+                glfwPollEvents();
+                try {
+                    TimeUnit.MILLISECONDS.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        inputListener.setName("input-listener-daemon");
+        inputListener.setDaemon(true);
+        inputListener.start();
+        Thread listenActions = new Thread(() -> {
+            // TODO clean this shit
+//            inputHandler.createMouseEvent(new MouseEvent(() -> System.out.println("Wow"), ActionType.CLICKED,
+//                    0));
+//            inputHandler.createKeyboardEvent(new KeyboardEvent(() -> System.out.println("Hey"), ActionType.RELEASED,
+//                    GLFW_KEY_Q));
+//            inputHandler.createKeyboardEvent(new KeyboardEvent(() -> System.out.print("."), ActionType.CLICKED,
+//                    GLFW_KEY_LEFT));
+            System.out.println("hash: " + System.identityHashCode(inputHandler));
+            while (true) {
+                try {
+                    inputHandler.listenkeyboardEvent();
+                    inputHandler.listenMouseEvent();
+                    inputHandler.updateKeyboardEventsType();
+                    inputHandler.updateMouseEventsType();
+                    TimeUnit.MILLISECONDS.sleep(10);
+                } catch (InterruptedException e) {
+                    System.err.println("Interrupt input handling");
+                    break;
+                }
+            }
+        });
+        listenActions.setName("listen-input");
+        listenActions.setDaemon(true);
+        listenActions.start();
+    }
+
+    public void addKeyboardEvent(KeyboardEvent event) {
+        System.out.println("hash: " + System.identityHashCode(inputHandler));
+        inputHandler.createKeyboardEvent(event);
+    }
+
+    public void addMouseEvent(MouseEvent event) {
+        inputHandler.createMouseEvent(event);
     }
 
     public boolean isStarted() {

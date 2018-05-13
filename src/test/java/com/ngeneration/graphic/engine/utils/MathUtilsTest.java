@@ -26,4 +26,15 @@ public class MathUtilsTest {
         System.out.println("intersection = " + intersection);
 
     }
+
+    @Test
+    public void testIntersection3() {
+        Vector p1 = new Vector(10, 0);
+        Vector p2 = new Vector(10, 10);
+        Vector p3 = new Vector(-10, -10);
+        Vector p4 = new Vector(0, -10);
+        Vector intersection = MathUtils.intersection(p1, p2, p3, p4);
+        System.out.println("intersection = " + intersection);
+
+    }
 }

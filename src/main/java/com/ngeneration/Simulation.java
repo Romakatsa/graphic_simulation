@@ -12,6 +12,8 @@ import com.ngeneration.graphic.engine.commands.Command;
 import com.ngeneration.graphic.engine.commands.QuitCommand;
 import com.ngeneration.graphic.engine.drawablecomponents.PhysicalRenderedComponent;
 import com.ngeneration.graphic.engine.drawablecomponents.RenderedComponent;
+import com.ngeneration.graphic.engine.input.ActionType;
+import com.ngeneration.graphic.engine.input.KeyboardEvent;
 import com.ngeneration.graphic.engine.lwjgl_engine.GraphicEngine;
 import com.ngeneration.graphic.engine.lwjgl_engine.LwjglGraphicEngine;
 import com.ngeneration.graphic.engine.physics.PhysicalComponentStateUpdater;
@@ -27,6 +29,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.ngeneration.ComponentsFactory.*;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_Q;
 
 public class Simulation {
 
@@ -42,6 +46,8 @@ public class Simulation {
     private DrawContext player;
     private DrawContext secondaryRole;
     private ControlPanelController controlPanelController;
+    private DrawArea backgroundArea;
+    private Window<Long> mainWindow;
 
     public void init() {
         System.out.println("Init Simulation. . .");
@@ -114,6 +120,19 @@ public class Simulation {
         player.put(10, miniCarPopulation);
         secondaryRole.put(5, road);
 
+        mainWindow.addKeyboardEvent(new KeyboardEvent(() -> {
+            System.out.println("left please");
+        }, ActionType.CLICKED,
+                GLFW_KEY_LEFT));
+//        mainWindow.addKeyboardEvent(
+//                new KeyboardEvent(() -> {
+//                    System.out.println("left please");
+//                    backgroundArea.setShift(new Vector(-1, 0));
+//                },
+//                        ActionType.CLICKED, GLFW_KEY_LEFT));
+
+        mainWindow.addKeyboardEvent(new KeyboardEvent(() -> System.out.print("Go sleep..."), ActionType.CLICKED,
+                GLFW_KEY_LEFT));
         // Simulation
         System.out.println("Start simulation plot");
         simulationPlot();
@@ -131,9 +150,9 @@ public class Simulation {
 
     private void initGraphic() {
         GraphicEngine<Long> engine = new LwjglGraphicEngine();
-        Window<Long> window = Window.<Long>create("Simulation", 800, 800, engine);
-        windows.add(window);
-        DrawArea backgroundArea = window.allocateFullScreenArea();
+        mainWindow = Window.<Long>create("Simulation", 800, 800, engine);
+        windows.add(mainWindow);
+        backgroundArea = mainWindow.allocateFullScreenArea();
         secondaryRole = new DrawContext("secondary");
         player = new DrawContext("player");
         aiViewContext = new DrawContext("ai");

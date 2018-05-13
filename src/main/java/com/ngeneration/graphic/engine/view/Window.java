@@ -4,6 +4,8 @@ import com.ngeneration.graphic.engine.PlaceOnScreen;
 import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.drawers.Drawer;
 import com.ngeneration.graphic.engine.enums.ColorEnum;
+import com.ngeneration.graphic.engine.input.KeyboardEvent;
+import com.ngeneration.graphic.engine.input.MouseEvent;
 import com.ngeneration.graphic.engine.lwjgl_engine.GraphicEngine;
 
 import java.util.ArrayList;
@@ -110,5 +112,12 @@ public class Window<ID> {
 
     public boolean isActive() {
         return active;
+    }
+
+    public void addKeyboardEvent(KeyboardEvent keyboardEvent) {
+        engine.addKeyboardEvent(keyboardEvent);
+    }
+    public void addMouseEvent(MouseEvent mouseEvent) {
+        engine.addMouseEvent(mouseEvent);
     }
 }

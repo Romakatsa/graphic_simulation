@@ -72,6 +72,19 @@ public class MathUtils {
                     ||
                     (p1.getY() < p2.getY()
                             && (yIntersection <= p1.getY() || p2.getY() <= yIntersection))
+
+                    ||
+                    (p3.getX() > p4.getX()
+                            && (p3.getX() <= xIntersection || xIntersection <= p4.getX()))
+                    ||
+                    (p3.getX() < p4.getX()
+                            && (xIntersection <= p3.getX() || p4.getX() <= xIntersection))
+                    ||
+                    (p3.getY() > p4.getY()
+                            && (p3.getY() <= yIntersection || yIntersection <= p4.getY()))
+                    ||
+                    (p3.getY() < p4.getY()
+                            && (yIntersection <= p3.getY() || p4.getY() <= yIntersection))
                     ) {
                 return null;
             }

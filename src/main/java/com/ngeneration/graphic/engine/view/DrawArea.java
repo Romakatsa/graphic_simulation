@@ -36,17 +36,17 @@ public abstract class DrawArea extends RenderedComponent implements AutoCloseabl
 
     public void setZoomFactor(double factor) {
         this.zoomFactor = Vector.one().multiple(factor);
-        this.size = Vector.diag(100).multiple(factor);
+//        this.size = Vector.diag(100).multiple(factor);
     }
 
     public void setZoom(Vector zoomFactor) {
         this.zoomFactor = zoomFactor;
-        this.size = zoomFactor.multiple(100);
+//        this.size = zoomFactor.multiple(100);
     }
 
     public void setShift(Vector shift) {
         this.shift = shift;
-        this.position = shift;
+//        this.position = shift;
     }
 
     public Vector getZoomFactor() {
@@ -63,6 +63,6 @@ public abstract class DrawArea extends RenderedComponent implements AutoCloseabl
 
     public void setRotationRadian(double rotationRadian) {
         this.rotationRadian = rotationRadian;
-        this.rotation = rotationRadian;
+//        this.rotation = rotationRadian;
     }
 }

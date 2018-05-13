@@ -1,10 +1,7 @@
 package com.ngeneration;
 
-import com.ngeneration.graphic.engine.drawers.Console2DDrawer;
-import com.ngeneration.graphic.engine.drawers.Drawer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +10,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 @SpringBootApplication
-public class SpringStarterExample {
+public class SpringStarter {
 
     @Autowired
     private String secret;
