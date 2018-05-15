@@ -13,7 +13,7 @@ import java.util.List;
 public class IntelligentDriver {
     private static final int DEFAULT_VIEW_LINE_AMOUNT = 7;
     private final int viewLineAmount;
-    private final DrawContext context;
+    private final DrawContext context; // TODO Roma. If you want draw smth just put it here and inherit your object from RenderedComponent
     private double[] viewLinesObstacleDistance;// TODO Roma look here. It's output of intelligent driver viewer
     private Line[] lines;
     private final Road road;

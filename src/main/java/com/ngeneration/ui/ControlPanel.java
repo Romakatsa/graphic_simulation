@@ -1,6 +1,7 @@
 package com.ngeneration.ui;
 
 import com.ngeneration.Simulation;
+import com.ngeneration.TavrovSimulation;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

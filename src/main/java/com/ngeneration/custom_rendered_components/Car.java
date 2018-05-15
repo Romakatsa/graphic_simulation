@@ -3,7 +3,9 @@ package com.ngeneration.custom_rendered_components;
 import com.ngeneration.ai.Driver;
 import com.ngeneration.graphic.engine.Shape;
 import com.ngeneration.graphic.engine.Vector;
+import com.ngeneration.graphic.engine.drawablecomponents.Controllable;
 import com.ngeneration.graphic.engine.drawablecomponents.PhysicalRenderedComponent;
+import com.ngeneration.graphic.engine.drawablecomponents.Renderable;
 import com.ngeneration.graphic.engine.enums.ColorEnum;
 import com.ngeneration.graphic.engine.view.DrawContext;
 

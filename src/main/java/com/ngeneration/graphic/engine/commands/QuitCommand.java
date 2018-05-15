@@ -1,12 +1,12 @@
 package com.ngeneration.graphic.engine.commands;
 
-import com.ngeneration.Simulation;
+import com.ngeneration.TavrovSimulation;
 
 public class QuitCommand implements Runnable, Command {
 
-    protected Simulation simulation;
+    protected TavrovSimulation simulation;
 
-    public QuitCommand(Simulation simulation) {
+    public QuitCommand(TavrovSimulation simulation) {
         this.simulation = simulation;
     }
 

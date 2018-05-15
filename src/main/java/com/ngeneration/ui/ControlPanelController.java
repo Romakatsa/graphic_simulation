@@ -1,6 +1,7 @@
 package com.ngeneration.ui;
 
 import com.ngeneration.Simulation;
+import com.ngeneration.TavrovSimulation;
 import com.ngeneration.ai.BrownianDriver;
 import com.ngeneration.graphic.engine.commands.BrownianDriverCommand;
 import javafx.application.Application;
@@ -149,7 +150,7 @@ public class ControlPanelController extends Application {
     }
 
     public void resetSimulation() {
-        simulation.reset();
+        simulation.restart();
         driverTwistExtentCommand.clear();
         driverChangeSpeedCommand.clear();
 //        for (BrownianDriver driver : drivers) {

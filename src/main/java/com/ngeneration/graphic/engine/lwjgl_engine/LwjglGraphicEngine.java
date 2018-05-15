@@ -262,13 +262,7 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
         inputListener.setDaemon(true);
         inputListener.start();
         Thread listenActions = new Thread(() -> {
-            // TODO clean this shit
-//            inputHandler.createMouseEvent(new MouseEvent(() -> System.out.println("Wow"), ActionType.CLICKED,
-//                    0));
-//            inputHandler.createKeyboardEvent(new KeyboardEvent(() -> System.out.println("Hey"), ActionType.RELEASED,
-//                    GLFW_KEY_Q));
-//            inputHandler.createKeyboardEvent(new KeyboardEvent(() -> System.out.print("."), ActionType.CLICKED,
-//                    GLFW_KEY_LEFT));
+            // TODO refactor
             while (true) {
                 try {
                     inputHandler.listenkeyboardEvent();
