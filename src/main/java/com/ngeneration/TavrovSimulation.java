@@ -58,7 +58,7 @@ public class TavrovSimulation implements Simulation{
 
 
     public void start() {
-        System.out.println("Prepare TavrovSimulation. . .");
+        System.out.println("Prepare Tavrov simulation. . .");
         initGraphic();
 //        playWithReflection(window);
 //        playWithAreaRotation(backgroundArea);
@@ -168,9 +168,9 @@ public class TavrovSimulation implements Simulation{
     }
 
     private void initSchedulers() {
-        loop = new ComponentsScheduler<>(new Loop());
+        loop = new ComponentsScheduler<>(new Loop(-50, 50, -50, 50));
         physics = new ComponentsScheduler<>(new PhysicalComponentStateUpdater());
-        driver = new ComponentsScheduler<>(createDriver(11.2, 1.05));
+        driver = new ComponentsScheduler<>(createDriver(100.2, 1.05));
     }
 
     private void addInputCommands() {

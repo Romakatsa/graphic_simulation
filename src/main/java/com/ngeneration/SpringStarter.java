@@ -17,7 +17,9 @@ public class SpringStarter {
 
     public static void main(String[] args) {
 //        SpringApplication.run(SpringStarterExample.class, args);
-        Simulation simulation = new SimpleFacadeSimulation();
+        Simulation simulation;
+//        simulation= new SimpleFacadeSimulation();
+        simulation = new TavrovSimulation();
         simulation.init();
         simulation.start();
     }
