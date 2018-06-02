@@ -4,15 +4,13 @@ import com.ngeneration.ai.BrownianDriver;
 import com.ngeneration.ai.IntelligentDriver;
 import com.ngeneration.custom_rendered_components.Car;
 import com.ngeneration.custom_rendered_components.Road;
-import com.ngeneration.graphic.engine.ComponentsScheduler;
-import com.ngeneration.graphic.engine.PlaceOnScreen;
-import com.ngeneration.graphic.engine.ThreeVector;
-import com.ngeneration.graphic.engine.Vector;
+import com.ngeneration.graphic.engine.*;
 import com.ngeneration.graphic.engine.commands.BrownianDriverCommand;
 import com.ngeneration.graphic.engine.commands.Command;
 import com.ngeneration.graphic.engine.commands.QuitCommand;
 import com.ngeneration.graphic.engine.drawablecomponents.PhysicalRenderedComponent;
 import com.ngeneration.graphic.engine.drawablecomponents.RenderedComponent;
+import com.ngeneration.graphic.engine.enums.Color;
 import com.ngeneration.graphic.engine.input.ActionType;
 import com.ngeneration.graphic.engine.input.KeyboardEvent;
 import com.ngeneration.graphic.engine.lwjgl_engine.GraphicEngine;
@@ -22,17 +20,17 @@ import com.ngeneration.graphic.engine.schedulers.Loop;
 import com.ngeneration.graphic.engine.view.DrawArea;
 import com.ngeneration.graphic.engine.view.DrawContext;
 import com.ngeneration.graphic.engine.view.Window;
-import com.ngeneration.ui.ControlPanel;
-import com.ngeneration.ui.ControlPanelController;
+import com.ngeneration.javafx_gui.CarControlPanelController;
+import com.ngeneration.javafx_gui.PanelTemplate;
+import com.ngeneration.javafx_gui.SimulationPanel;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import static com.ngeneration.ComponentsFactory.*;
 import static org.lwjgl.glfw.GLFW.*;
 
-public class TavrovSimulation implements Simulation{
+public class TavrovSimulation extends AbstractSimulation {
 
     private final Set<Window<Long>> windows = new HashSet<>();
     private final Set<RenderedComponent> renderedComponents = new HashSet<>();
@@ -45,30 +43,31 @@ public class TavrovSimulation implements Simulation{
     private DrawContext aiViewContext;
     private DrawContext player;
     private DrawContext secondaryRole;
-    private ControlPanelController controlPanelController;
+    private CarControlPanelController carControlPanelController;
     private DrawArea backgroundArea;
     private Window<Long> mainWindow;
     private DrawArea mapArea;
 
-    public void init() {
-        System.out.println("Init TavrovSimulation. . .");
-        System.out.println("Loading control panel");
-        controlPanelController = ControlPanel.create(this);
+    public TavrovSimulation() {
+        super("Tavrov simulation");
     }
 
-
-    public void start() {
+    public void launch() {
         System.out.println("Prepare Tavrov simulation. . .");
         initGraphic();
 //        playWithReflection(window);
 //        playWithAreaRotation(backgroundArea);
+        initPanels();
         initSchedulers();
 
-        Car bigCar = aCar()
+        Car smallCar = aCar()
                 .withSize(new Vector(2, 5))
+                .withRotation(Math.PI / 4)
                 .build();
-        Car miniCar = aCar()
+        Car bigCar = aCar()
                 .withSize(new Vector(3, 7))
+                .withName("Super car")
+                .withSpeed(Vector.diag(4))
                 .build();
         Road road = aRoad()
                 .withWidth(30)
@@ -80,7 +79,7 @@ public class TavrovSimulation implements Simulation{
                 .withWidth(45)
                 .nextPoint(50, 0)
                 .build();
-        Set<Car> miniCarPopulation = populate(miniCar, 1,
+        Set<Car> bigCarPopulation = populate(bigCar, 1,
                 new FixedPositionPopulator<>(-50, 0),
                 new SimpleNameGenerator<>(),
                 new BindingWithScheduler<>(loop, physics),
@@ -94,23 +93,38 @@ public class TavrovSimulation implements Simulation{
                     scheduler.add(mapArea);
                 },
                 (curCar, iteration) -> {
-                    IntelligentDriver intelligentDriver = new IntelligentDriver(road, aiViewContext);
+                    IntelligentDriver intelligentDriver = new IntelligentDriver(road, aiViewContext, true);
                     addSchedulers(curCar,
-                            new ComponentsScheduler<>(createDriver(0.0, 0.00)),
+//                            new ComponentsScheduler<>(createDriver(0.0, 0.00)),
                             new ComponentsScheduler<>(intelligentDriver.new IntelligentDriverViewAnalyzer(), 20),
                             new ComponentsScheduler<>(intelligentDriver.new IntelligentDriverController(), 50)
                     );
                 }
         );
-        Set<Car> bigCarPopulation = populate(bigCar, 10,
-                new UniformPopulator<>(),
+        Set<Car> smallCarPopulation = populate(smallCar, 100,
+                new UniformPopulator<>(100),
                 new SimpleNameGenerator<>(),
                 new BindingWithScheduler<>(loop, physics),
-                (curCar, iteration) -> addSchedulers(curCar, driver)
+                (curCar, iteration) -> addSchedulers(curCar, driver),
+                (car, i) -> {
+                    car.setColors(new Color(Math.random(), Math.random(), Math.random()));
+                }
         );
-        player.put(10, bigCarPopulation);
-        player.put(10, miniCarPopulation);
-        secondaryRole.put(5, road);
+        player.put(11, bigCarPopulation);
+        player.put(10, smallCarPopulation);
+
+//        RenderedComponent c1 = new RenderedComponent(new Vector(-22, 0), Vector.diag(10), Math.PI / 1.05,
+//                Color.DARK_RED, 0, Shape.RECT_2);
+//        c1.setName("QUA");
+//        player.put(1, c1);
+//        ComponentsScheduler<RenderedComponent> scheduler = new ComponentsScheduler<>((c, d) -> {
+//            c.setRotation(c.getRotation() + 0.005);
+//        });
+//        scheduler.add(c1);
+
+//        player.put(1, new RenderedComponent(new Vector(-24.5, 15), Vector.diag(10), Math.PI/6,
+//                Color.DARK_BLUE, 0, Shape.RECT));
+//        secondaryRole.put(5, road);
 
         addInputCommands();
         // TavrovSimulation
@@ -122,8 +136,8 @@ public class TavrovSimulation implements Simulation{
         GraphicEngine<Long> engine = LwjglGraphicEngine.getInstance();
         mainWindow = Window.<Long>create("TavrovSimulation", 800, 800, engine);
         windows.add(mainWindow);
-        backgroundArea = mainWindow.allocateFullScreenArea();
-        mapArea = mainWindow.allocateArea(PlaceOnScreen.BOTTOM_LEFT_CORNER, 0.3, 0.3);
+        backgroundArea = mainWindow.allocateArea(PlaceOnScreen.CENTER, 0.5, 0.5);
+        mapArea = mainWindow.allocateArea(PlaceOnScreen.BOTTOM_LEFT_CORNER, 0.1, 0.1);
         secondaryRole = new DrawContext("secondary");
         player = new DrawContext("player");
         aiViewContext = new DrawContext("ai");
@@ -136,8 +150,23 @@ public class TavrovSimulation implements Simulation{
         mapArea.addContext(secondaryRole);
         mapArea.addContext(player);
 
-        mapArea.setSize(Vector.diag(40));
-        mapArea.setZoom(Vector.diag(0.5));
+        mapArea.setSize(Vector.diag(50));
+        mapArea.setZoom(Vector.diag(2));
+        mapArea.setVisible(false);
+    }
+
+    private void initPanels() {
+//        carControlPanelController = SimulationPanel.createPanelAndGetController(
+//                this, PanelTemplate.CAR_CONTROLLER.getTemplateFile(),
+//                "Car controller", "Car controller");
+        carControlPanelController = SimulationPanel.createPanelAndGetController(
+                this, PanelTemplate.CAR_CONTROLLER);
+    }
+
+    private void initSchedulers() {
+        loop = new ComponentsScheduler<>(new Loop(50));
+        physics = new ComponentsScheduler<>(new PhysicalComponentStateUpdater());
+        driver = new ComponentsScheduler<>(createDriver(10.2, 0.1));
     }
 
     private void playWithAreaRotation(DrawArea backgroundArea) {
@@ -165,12 +194,6 @@ public class TavrovSimulation implements Simulation{
         backgroundAreaReflection.addContext(player);
         backgroundAreaReflection2.addContext(player);
         backgroundAreaReflection3.addContext(player);
-    }
-
-    private void initSchedulers() {
-        loop = new ComponentsScheduler<>(new Loop(-50, 50, -50, 50));
-        physics = new ComponentsScheduler<>(new PhysicalComponentStateUpdater());
-        driver = new ComponentsScheduler<>(createDriver(100.2, 1.05));
     }
 
     private void addInputCommands() {
@@ -204,7 +227,7 @@ public class TavrovSimulation implements Simulation{
 
     private BrownianDriver createDriver(double speed, double twistExtent) {
         BrownianDriver driver = new BrownianDriver(speed, twistExtent);
-        controlPanelController.addDriverChangeSpeedCommand(driver,
+        carControlPanelController.addDriverChangeSpeedCommand(driver,
                 new BrownianDriverCommand.ChangeSpeed(driver),
                 new BrownianDriverCommand.ChangeTwist(driver));
         return driver;
@@ -236,7 +259,7 @@ public class TavrovSimulation implements Simulation{
 
     }
 
-    public void finish() {
+    public void doFinish() {
         for (Window<? extends Long> window : windows) {
             window.close();
         }

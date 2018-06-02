@@ -2,6 +2,7 @@ package com.ngeneration.graphic.engine.schedulers;
 
 import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.drawablecomponents.RenderedComponent;
+import com.ngeneration.graphic.engine.utils.MathUtils;
 
 import java.util.function.BiConsumer;
 
@@ -12,6 +13,10 @@ public class Loop implements BiConsumer<RenderedComponent, Double> {
     private final double maxX;
     private final double minY;
     private final double maxY;
+
+    public Loop(double rangeRadius) {
+        this(-rangeRadius, rangeRadius, -rangeRadius, rangeRadius);
+    }
 
     public Loop(double minX, double maxX, double minY, double maxY) {
         this.minX = minX;
@@ -26,13 +31,10 @@ public class Loop implements BiConsumer<RenderedComponent, Double> {
         double y = component.getPosition().getY();
         component.setPosition(
                 new Vector(
-                        loopValueInBounds(x, minX, maxX),
-                        loopValueInBounds(y, minY, maxY)
+                        MathUtils.loopValueInBounds(x, minX, maxX),
+                        MathUtils.loopValueInBounds(y, minY, maxY)
                 ));
     }
 
-    private double loopValueInBounds(double value, double min, double max) {
-        double delta = max - min;
-        return abs((value + abs(min) + abs(delta)) % delta) - abs(min);
-    }
+
 }

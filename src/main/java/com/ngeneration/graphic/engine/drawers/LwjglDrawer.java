@@ -1,9 +1,10 @@
 package com.ngeneration.graphic.engine.drawers;
 
+import com.ngeneration.graphic.engine.LazyLogger;
 import com.ngeneration.graphic.engine.Shape;
 import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.drawablecomponents.RenderedComponent;
-import com.ngeneration.graphic.engine.enums.ColorEnum;
+import com.ngeneration.graphic.engine.enums.Color;
 import com.ngeneration.graphic.engine.lwjgl_engine.LwjglGraphicEngine;
 import com.ngeneration.graphic.engine.report.ReportBuilder;
 import com.ngeneration.graphic.engine.view.DrawArea;
@@ -16,15 +17,18 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class LwjglDrawer extends Drawer<Long> {
+    private static final LazyLogger logger = LazyLogger.getLogger(LwjglDrawer.class);
+    private static final boolean TRACE_FPS = false;
+
     private Window<Long> window;
     private LwjglGraphicEngine engine = LwjglGraphicEngine.getInstance();
     private boolean cleanScreenBeforeDrawing = true;
     private boolean showGrid = true;
     private boolean showReport = false;
-    //    private Condition shouldCreateWindow = lock.newCondition();
-    //    private Condition shouldDraw = lock.newCondition();
-    //    private Condition windowIsCreated = lock.newCondition();
     //    private Lock lock = new ReentrantLock();
+    //    private Condition windowIsCreated = lock.newCondition();
+    //    private Condition shouldDraw = lock.newCondition();
+    //    private Condition shouldCreateWindow = lock.newCondition();
 
     private final Object shouldCreateWindowMonitor = new Object();
     private final Object shouldDrawMonitor = new Object();
@@ -33,6 +37,7 @@ public class LwjglDrawer extends Drawer<Long> {
     private boolean shouldDraw = false;
     private boolean windowIsCreated = false;
     private Instant lastReportInstant = null;
+    private boolean saveProportions;
 
     public LwjglDrawer() {
 //        this.window = window;
@@ -56,6 +61,7 @@ public class LwjglDrawer extends Drawer<Long> {
                 }
                 while (!Thread.currentThread().isInterrupted()
                         && engine.isStarted()) {
+                    Instant startInstant = Instant.now();
                     if (cleanScreenBeforeDrawing) {
                         engine.beforeFrame();
                     }
@@ -63,6 +69,10 @@ public class LwjglDrawer extends Drawer<Long> {
                         renderFrame();
                     }
                     engine.afterFrame(window.getId());
+                    Duration iterationDuration = Duration.between(startInstant, Instant.now());
+                    if (TRACE_FPS || iterationDuration.compareTo(Duration.ofMillis(18)) > 0) {
+                        logger.trace(iterationDuration.toString() + ". Should be lower than 0.017S");
+                    }
                 }
             } catch (InterruptedException e) {
             }
@@ -129,7 +139,7 @@ public class LwjglDrawer extends Drawer<Long> {
     {
         int sectionNumber = 10;
         double width = 0.2;
-        ColorEnum color = ColorEnum.DARK_GREEN;
+        Color color = Color.DARK_GREEN;
         double opacity = 0.8;
         for (int i = 0; i <= sectionNumber; i++) {
             gridLines.add(new RenderedComponent(new Vector(0, i * (100 / sectionNumber) - 50),
@@ -144,7 +154,7 @@ public class LwjglDrawer extends Drawer<Long> {
     private void showGrid() {
         if (showGrid) {
             for (RenderedComponent gridLine : gridLines) {
-                doRender(gridLine);
+                doRender(gridLine, null);
             }
         }
     }
@@ -164,7 +174,7 @@ public class LwjglDrawer extends Drawer<Long> {
                 component.getColors(), component.getOpacity(), component.getShapes());
     }
 
-    protected void doRender(RenderedComponent component) {
+    protected void doRender(RenderedComponent component, DrawArea holder) {
 //        component.render();
 //        System.out.println("Draw: " + component);
 //        AssertUtils.notNull(component.getPosition());
@@ -175,15 +185,23 @@ public class LwjglDrawer extends Drawer<Long> {
                     component.getPosition().getY(),
                     component.getSize().getX(),
                     component.getSize().getY(),
-                    component.getRotation(), component.getColors(), component.getShapes(), component.getOpacity());
+                    component.getRotation(), component.getColors(), component.getShapes(), component.getOpacity(),
+                    holder);
+        } else {
+            logger.error("Object isn't drawable. Position: " + component.getPosition() +
+                    ", size: " + component.getSize());
+
         }
     }
 
     private Vector transformPosition(RenderedComponent component, DrawArea area) {
         Vector componentPosition = component.getPosition();
 //        Vector componentSize = component.getSize();
-        double areaRotation = area.getRotationRadian() ;//+ area.getRotation();
-        Vector zoom = area.getZoomFactor().coordinatewiseMultiplication(area.getSize().divide(100));
+        double areaRotation = area.getRotationRadian();//+ area.getRotation();
+        Vector zoom = area.getZoomFactor();
+        if (saveProportions) {
+            zoom = zoom.coordinatewiseMultiplication(area.getSize().divide(100));
+        }
         Vector shift = area.getShift().plus(area.getPosition());
         Vector.PolarCoordinateSystemVector polar
                 = componentPosition//.coordinatewiseMultiplication(zoom).plus(shift)
@@ -195,16 +213,44 @@ public class LwjglDrawer extends Drawer<Long> {
     }
 
     private Vector transformSize(RenderedComponent component, DrawArea area) {
-        return component.getSize().coordinatewiseMultiplication(area.getZoomFactor())
-                .coordinatewiseMultiplication(area.getSize().divide(100));
+        saveProportions = false;
+        Vector size = component.getSize().coordinatewiseMultiplication(area.getZoomFactor());
+        if (saveProportions) {
+            size = size.coordinatewiseMultiplication(area.getSize().divide(100));
+        }
+        return size;
     }
 
     private double transformRotation(RenderedComponent component, DrawArea area) {
         return component.getRotation() + area.getRotationRadian();
     }
 
-    protected boolean isDrawable(RenderedComponent component) {
-        return true;// TODO
+    protected boolean isDrawable(RenderedComponent component, DrawArea holder) {
+        if (holder == null) {
+            return true;//todo collapse
+        }
+        return holder.isVisible();
+//        double componentPositionX = component.getPosition().getX();
+//        double componentPositionY = component.getPosition().getY();
+//        Vector areaLowBound = Vector.zero().minus(holder.getSize().divide(2));
+//        Vector areaHighBound = holder.getSize().divide(2);
+//        Vector reverseZoom = Vector.one().divide(holder.getZoomFactor());
+//        return componentPositionX >
+//                areaLowBound
+//                        .coordinatewiseMultiplication(reverseZoom).getX()
+//                &&
+//                componentPositionX <
+//                        areaHighBound
+//                                .coordinatewiseMultiplication(reverseZoom).getX()
+//                &&
+//                componentPositionY >
+//                        areaLowBound
+//                                .coordinatewiseMultiplication(reverseZoom).getY()
+//                &&
+//                componentPositionY <
+//                        areaHighBound
+//                                .coordinatewiseMultiplication(reverseZoom).getY()
+//                ;
     }
 
     private volatile Long windowId;

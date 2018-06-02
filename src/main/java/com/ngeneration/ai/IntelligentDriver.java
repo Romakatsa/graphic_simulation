@@ -4,7 +4,7 @@ import com.ngeneration.custom_rendered_components.Car;
 import com.ngeneration.custom_rendered_components.Road;
 import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.drawablecomponents.Line;
-import com.ngeneration.graphic.engine.enums.ColorEnum;
+import com.ngeneration.graphic.engine.enums.Color;
 import com.ngeneration.graphic.engine.utils.MathUtils;
 import com.ngeneration.graphic.engine.view.DrawContext;
 
@@ -14,23 +14,26 @@ public class IntelligentDriver {
     private static final int DEFAULT_VIEW_LINE_AMOUNT = 7;
     private final int viewLineAmount;
     private final DrawContext context; // TODO Roma. If you want draw smth just put it here and inherit your object from RenderedComponent
+    private final boolean drawLine;
     private double[] viewLinesObstacleDistance;// TODO Roma look here. It's output of intelligent driver viewer
     private Line[] lines;
     private final Road road;
 
-    public IntelligentDriver(Road road, DrawContext context) {
+    public IntelligentDriver(Road road, DrawContext context, boolean drawLine) {
         this.viewLineAmount = DEFAULT_VIEW_LINE_AMOUNT;
         viewLinesObstacleDistance = new double[viewLineAmount];
         lines = initLines();
         this.road = road;
         this.context = context;
-        context.put(20, lines);
+        this.drawLine = drawLine;
+        context.put(50, lines);
     }
 
     private Line[] initLines() {
         Line[] viewLines = new Line[viewLineAmount];
         for (int i = 0; i < viewLines.length; i++) {
-            viewLines[i] = new Line(Vector.zero(), Vector.zero(), 0.3, ColorEnum.RED, 0);
+            viewLines[i] = new Line(Vector.zero(), Vector.zero(), 0.3, Color.RED, 0);
+            viewLines[i].setVisible(drawLine);
         }
         return viewLines;
     }

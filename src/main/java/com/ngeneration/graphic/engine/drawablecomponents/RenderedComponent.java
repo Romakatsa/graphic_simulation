@@ -4,10 +4,8 @@ import com.ngeneration.graphic.engine.ComponentsScheduler;
 import com.ngeneration.graphic.engine.LazyLogger;
 import com.ngeneration.graphic.engine.Shape;
 import com.ngeneration.graphic.engine.Vector;
-import com.ngeneration.graphic.engine.drawers.Console1DDrawer;
 import com.ngeneration.graphic.engine.drawers.Drawer;
-import com.ngeneration.graphic.engine.drawers.LwjglDrawer;
-import com.ngeneration.graphic.engine.enums.ColorEnum;
+import com.ngeneration.graphic.engine.enums.Color;
 import com.ngeneration.graphic.engine.view.DrawArea;
 import com.ngeneration.graphic.engine.view.DrawContext;
 
@@ -24,7 +22,7 @@ public class RenderedComponent implements Cloneable {
     protected Vector position;
     protected Vector size;
     protected Shape shapes;
-    protected ColorEnum colors;
+    protected Color colors;
     protected double rotation;
     protected boolean visible = true;
     protected double opacity;
@@ -36,7 +34,7 @@ public class RenderedComponent implements Cloneable {
     protected Supplier<Boolean> isComponentAlreadyNeed = () -> true; //TODO elaborate on
     protected List<ComponentsScheduler> schedulers = new ArrayList<>();
 
-    public RenderedComponent(Vector position, Vector size, double rotation, ColorEnum colors, double opacity, Shape shapes) {
+    public RenderedComponent(Vector position, Vector size, double rotation, Color colors, double opacity, Shape shapes) {
         this.position = position;
         this.size = size;
         this.shapes = shapes;
@@ -129,11 +127,11 @@ public class RenderedComponent implements Cloneable {
         this.shapes = shapes;
     }
 
-    public ColorEnum getColors() {
+    public Color getColors() {
         return colors;
     }
 
-    public void setColors(ColorEnum colors) {
+    public void setColors(Color colors) {
         this.colors = colors;
     }
 

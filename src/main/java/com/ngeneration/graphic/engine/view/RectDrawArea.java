@@ -4,14 +4,14 @@ import com.ngeneration.graphic.engine.PlaceOnScreen;
 import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.drawablecomponents.Line;
 import com.ngeneration.graphic.engine.drawers.Drawer;
-import com.ngeneration.graphic.engine.enums.ColorEnum;
+import com.ngeneration.graphic.engine.enums.Color;
 
 public class RectDrawArea extends DrawArea {
     //    private Vector size;
     private final Line[] border = new Line[4];
-    private double borderWidth = 3;
+    private double borderWidth = 1;
     private double borderOpacity;
-    private ColorEnum borderColor;
+    private Color borderColor;
 
     public RectDrawArea(Window holderWindow, Vector center, Vector size) {
         super(holderWindow);
@@ -22,19 +22,37 @@ public class RectDrawArea extends DrawArea {
     }
 
     private void updateBorder() {
-        borderColor = ColorEnum.DARK_GREEN;
+        borderColor = Color.DARK_GREEN;
         borderOpacity = 0;
-        border[0] = new Line(this.getPosition().plus(this.getSize().divide(2)),
-                this.getPosition().plus(this.getSize().divide(2)).minus(new Vector(0, getSize().getX())),
+
+        Vector areaCenter = this.getPosition();
+        Vector areaHalfSize = this.getSize().divide(2);
+        Vector areaSizeX = new Vector(getSize().getX(), 0);
+        Vector areaSizeY = new Vector(0, getSize().getY());
+
+        Vector halfBorderShiftX = new Vector(borderWidth / 2, 0);
+        Vector halfBorderShiftY = new Vector(0, borderWidth / 2);
+
+        Vector topRightCorner = areaCenter.plus(areaHalfSize);
+        Vector bottomRightCorner = areaCenter.plus(areaHalfSize).minus(areaSizeY);
+        Vector topLeftCorner = areaCenter.plus(areaHalfSize).minus(areaSizeX);
+        Vector bottomLeftCorner = areaCenter.minus(areaHalfSize);
+
+        border[0] = new Line(
+                topRightCorner.plus(halfBorderShiftX).plus(halfBorderShiftY),
+                bottomRightCorner.plus(halfBorderShiftX).minus(halfBorderShiftY),
                 borderWidth, borderColor, borderOpacity);
-        border[1] = new Line(this.getPosition().plus(this.getSize().divide(2)),
-                this.getPosition().plus(this.getSize().divide(2)).minus(new Vector(getSize().getX(), 0)),
+        border[1] = new Line(
+                topRightCorner.plus(halfBorderShiftY).plus(halfBorderShiftX),
+                topLeftCorner.plus(halfBorderShiftY).minus(halfBorderShiftX),
                 borderWidth, borderColor, borderOpacity);
-        border[2] = new Line(this.getPosition().minus(this.getSize().divide(2)),
-                this.getPosition().minus(this.getSize().divide(2)).plus(new Vector(0, getSize().getY())),
+        border[2] = new Line(
+                bottomLeftCorner.minus(halfBorderShiftX).minus(halfBorderShiftY),
+                topLeftCorner.minus(halfBorderShiftX).plus(halfBorderShiftY),
                 borderWidth, borderColor, borderOpacity);
-        border[3] = new Line(this.getPosition().minus(this.getSize().divide(2)),
-                this.getPosition().minus(this.getSize().divide(2)).plus(new Vector(getSize().getX(), 0)),
+        border[3] = new Line(
+                bottomLeftCorner.minus(halfBorderShiftY).minus(halfBorderShiftX),
+                bottomRightCorner.minus(halfBorderShiftY).plus(halfBorderShiftX),
                 borderWidth, borderColor, borderOpacity);
         System.out.println("border[3] = " + border[3]);
     }
@@ -44,16 +62,16 @@ public class RectDrawArea extends DrawArea {
         updateBorder();
         this.setSize(new Vector(100 * fractionX,
                 100 * fractionY));
-        double x;
-        double y;
+        double x = 0;
+        double y = 0;
         if (place.isLeft()) {
             x = -50 + size.divide(2).getX();
-        } else {
-            x = -50 +100 - size.divide(2).getX();
+        } else if (place.isRight()) {
+            x = -50 + 100 - size.divide(2).getX();
         }
         if (place.isTop()) {
-            y = -50 +100 - size.divide(2).getY();
-        } else {
+            y = -50 + 100 - size.divide(2).getY();
+        } else if (place.isBottom()) {
             y = -50 + size.divide(2).getY();
         }
         setPosition(new Vector(x, y));
@@ -63,9 +81,11 @@ public class RectDrawArea extends DrawArea {
 
     @Override
     public <T> void render(Drawer<T> drawer, DrawArea area) {
-        super.render(drawer, area);
-        for (Line aBorder : border) {
-            aBorder.render(drawer, area);
+        if (visible) {
+            super.render(drawer, area);
+            for (Line aBorder : border) {
+                aBorder.render(drawer, area);
+            }
         }
     }
 

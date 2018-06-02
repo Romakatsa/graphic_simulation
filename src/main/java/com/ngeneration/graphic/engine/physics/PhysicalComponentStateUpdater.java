@@ -5,7 +5,7 @@ import com.ngeneration.graphic.engine.drawablecomponents.PhysicalRenderedCompone
 public class PhysicalComponentStateUpdater
         implements RenderedComponentStateRegularUpdater<PhysicalRenderedComponent> { //todo rename "Updater"
 
-    private final double TIME_DELTA = 1; //todo: probably should create map<Component, lastUpdate> ?
+    private final double TIME_DELTA = 1; //todo: probably should createPanelAndGetController map<Component, lastUpdate> ?
 
     @Override
     public void accept(PhysicalRenderedComponent component, Double deltaTime) {

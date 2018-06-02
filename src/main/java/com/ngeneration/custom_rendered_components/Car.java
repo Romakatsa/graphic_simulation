@@ -3,10 +3,8 @@ package com.ngeneration.custom_rendered_components;
 import com.ngeneration.ai.Driver;
 import com.ngeneration.graphic.engine.Shape;
 import com.ngeneration.graphic.engine.Vector;
-import com.ngeneration.graphic.engine.drawablecomponents.Controllable;
 import com.ngeneration.graphic.engine.drawablecomponents.PhysicalRenderedComponent;
-import com.ngeneration.graphic.engine.drawablecomponents.Renderable;
-import com.ngeneration.graphic.engine.enums.ColorEnum;
+import com.ngeneration.graphic.engine.enums.Color;
 import com.ngeneration.graphic.engine.view.DrawContext;
 
 import java.util.HashMap;
@@ -21,6 +19,7 @@ public class Car extends PhysicalRenderedComponent {
         this.speed = builder.speed;
         this.acceleration = builder.acceleration;
         this.driver = builder.driver;
+        this.name = builder.name;
         builder.contexts.forEach((context, layerNumber) -> context.put(layerNumber, this));
     }
 
@@ -28,13 +27,14 @@ public class Car extends PhysicalRenderedComponent {
         Vector position;
         Vector size;
         Shape shapes;
-        ColorEnum colors;
+        Color colors;
         double rotation;
         boolean visible = true;
         double opacity;
         Vector speed;
         Vector acceleration;
         Driver driver;
+        String name;
         Map<DrawContext, Integer> contexts = new HashMap<>();
 
         public Builder withPosition(Vector position) {
@@ -52,7 +52,7 @@ public class Car extends PhysicalRenderedComponent {
             return this;
         }
 
-        public Builder withColors(ColorEnum colors) {
+        public Builder withColors(Color colors) {
             this.colors = colors;
             return this;
         }
@@ -84,6 +84,11 @@ public class Car extends PhysicalRenderedComponent {
 
         public Builder withDriver(Driver driver) {
             this.driver = driver;
+            return this;
+        }
+
+        public Builder withName(String name) {
+            this.name = name;
             return this;
         }
 

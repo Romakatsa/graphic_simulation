@@ -1,10 +1,7 @@
-package com.ngeneration.ui;
+package com.ngeneration.javafx_gui;
 
-import com.ngeneration.Simulation;
-import com.ngeneration.TavrovSimulation;
 import com.ngeneration.ai.BrownianDriver;
 import com.ngeneration.graphic.engine.commands.BrownianDriverCommand;
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,7 +15,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
-public class ControlPanelController extends Application {
+public class CarControlPanelController extends SimulationPanelController {
     @FXML
     public Slider slider1;
     @FXML
@@ -37,7 +34,6 @@ public class ControlPanelController extends Application {
     private final ObservableList<BrownianDriver> drivers = FXCollections.observableArrayList();
     private final ObservableList<BrownianDriverCommand.ChangeSpeed> driverChangeSpeedCommand = FXCollections.observableArrayList();
     private final ObservableList<BrownianDriverCommand.ChangeTwist> driverTwistExtentCommand = FXCollections.observableArrayList();
-    private Simulation simulation;
 
     public synchronized void addDriverChangeSpeedCommand(BrownianDriver driver,
                                                          BrownianDriverCommand.ChangeSpeed changeSpeed,
@@ -159,7 +155,4 @@ public class ControlPanelController extends Application {
         drivers.clear();
     }
 
-    public void setSimulation(Simulation simulation) {
-        this.simulation = simulation;
-    }
 }

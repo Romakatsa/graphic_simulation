@@ -6,7 +6,7 @@ import com.ngeneration.custom_rendered_components.Road;
 import com.ngeneration.graphic.engine.ComponentsScheduler;
 import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.drawablecomponents.RenderedComponent;
-import com.ngeneration.graphic.engine.enums.ColorEnum;
+import com.ngeneration.graphic.engine.enums.Color;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,7 +18,7 @@ public class ComponentsFactory {
 
     public static Car.Builder aCar() {
         return new Car.Builder()
-                .withColors(ColorEnum.DARK_BLUE)
+                .withColors(Color.DARK_BLUE)
                 .withSize(Vector.one())
                 .withPosition(Vector.one())
                 .withSpeed(Vector.one())
@@ -71,6 +71,7 @@ public class ComponentsFactory {
                 T clone = (T) component.clone();
                 for (BiConsumer<T, Integer> transform : transformation) {
                     transform.accept(clone, i);
+                    System.out.println("11112");
                 }
                 components.add(clone);
             }
@@ -122,9 +123,18 @@ public class ComponentsFactory {
     }
 
     public static class UniformPopulator<T extends RenderedComponent> implements BiConsumer<T, Integer> {
+        private final int amount;
+
+        public UniformPopulator(int amount) {
+            this.amount = amount;
+        }
+
         @Override
         public void accept(T component, Integer iteration) {
-            component.setPosition(new Vector(10 * (iteration / 10), 10 * (iteration % 10)));
+            int side = (int) (Math.sqrt(amount));
+            double step = (100d / Math.sqrt(amount));
+            System.out.println("side = " + side);
+            component.setPosition(new Vector(step * (iteration / side), step * (iteration % side)));
         }
     }
 
@@ -146,7 +156,14 @@ public class ComponentsFactory {
     public static class SimpleNameGenerator<T extends RenderedComponent> implements BiConsumer<T, Integer> {
         @Override
         public void accept(T component, Integer iteration) {
-            component.setName(component.getClass().getSimpleName() + iteration);
+            String basicName;
+            String prototypeName = component.getName();
+            if (prototypeName == null || prototypeName.isEmpty()) {
+                basicName = component.getClass().getSimpleName();
+            } else {
+                basicName = prototypeName;
+            }
+            component.setName(basicName + iteration);
         }
     }
 

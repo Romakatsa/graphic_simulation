@@ -4,6 +4,8 @@ import com.ngeneration.graphic.engine.Vector;
 
 import java.util.Arrays;
 
+import static java.lang.Math.abs;
+
 public class MathUtils {
     public static double round(double number, int order) {
         if (order > 19) {
@@ -90,5 +92,26 @@ public class MathUtils {
             }
         }
         return new Vector(xIntersection, yIntersection);
+    }
+
+    public static double loopValueInBounds(double value, double min, double max) {
+        double delta = max - min;
+        return abs((value + abs(min) + abs(delta)) % delta) - abs(min);
+    }
+
+    public static int loopValueInBounds(int value, int min, int max) {
+        if (min > max) {
+            int tmp = max;
+            max = min;
+            min = tmp;
+        }
+        int delta = max - min + 1;
+        if (value < min) {
+            return max - abs((value - min) % (delta)) + 1;
+        } else if (value > max) {
+            return min + abs((value - max) % (delta)) - 1;
+        } else {
+            return value;
+        }
     }
 }

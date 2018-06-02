@@ -7,7 +7,7 @@
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ngeneration.ui.ControlPanelController">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ngeneration.javafx_gui.CarControlPanelController">
    <children>
       <CheckBox fx:id="checkBox" layoutX="32.0" layoutY="31.0" mnemonicParsing="false" onAction="#onActionCheckBox1" text="CheckBox" />
       <Slider fx:id="slider1" accessibleHelp="brownian driver" accessibleRoleDescription="brownian driver" accessibleText="brownian driver" layoutX="32.0" layoutY="123.0" onMouseDragged="#dragSlider1" onMouseReleased="#doneDragSlider1" orientation="VERTICAL" />

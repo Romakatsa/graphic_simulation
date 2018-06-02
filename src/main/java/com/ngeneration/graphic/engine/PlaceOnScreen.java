@@ -9,7 +9,7 @@ public enum PlaceOnScreen {
     RIGHT(Direction.NONE, Direction.RIGHT),
     TOP(Direction.TOP, Direction.NONE),
     BOTTOM(Direction.BOTTOM, Direction.NONE),
-    FULL_SCREEN(Direction.NONE, Direction.NONE);
+    CENTER(Direction.NONE, Direction.NONE);
 
     private final Direction vertical;
     private final Direction horizontal;
@@ -29,8 +29,15 @@ public enum PlaceOnScreen {
         return vertical == Direction.TOP;
     }
 
+    public boolean isRight() {
+        return vertical == Direction.RIGHT;
+    }
+
     public boolean isLeft() {
         return horizontal == Direction.LEFT;
     }
 
+    public boolean isBottom() {
+        return vertical == Direction.BOTTOM;
+    }
 }

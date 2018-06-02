@@ -16,11 +16,10 @@ public class SpringStarter {
     private String secret;
 
     public static void main(String[] args) {
-//        SpringApplication.run(SpringStarterExample.class, args);
+//        SpringApplication.start(SpringStarterExample.class, args);
         Simulation simulation;
 //        simulation= new SimpleFacadeSimulation();
         simulation = new TavrovSimulation();
-        simulation.init();
         simulation.start();
     }
 

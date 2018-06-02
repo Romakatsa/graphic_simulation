@@ -10,7 +10,7 @@ public class Console1DDrawer extends Drawer {
         return component;
     }
 
-    public void doRender(RenderedComponent component) {
+    public void doRender(RenderedComponent component, DrawArea holder) {
         double position = component.getPosition().getX();
         for (int i = 0; i < Math.abs(position / 10); i++) {
             System.out.print(".");
@@ -19,7 +19,7 @@ public class Console1DDrawer extends Drawer {
     }
 
     @Override
-    public boolean isDrawable(RenderedComponent component) {
+    public boolean isDrawable(RenderedComponent component, DrawArea holder) {
         return component != null
                 && component.getPosition() != null
                 && component.getSize() != null;

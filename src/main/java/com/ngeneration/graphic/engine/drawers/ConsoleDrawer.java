@@ -10,14 +10,14 @@ public class ConsoleDrawer extends Drawer {
         return component;
     }
 
-    public void doRender(RenderedComponent component) {
+    public void doRender(RenderedComponent component, DrawArea holder) {
         System.out.println("\tDraw component:");
         System.out.println("\t\t" + component.getPosition());
         System.out.println("\t\t" + component.getSize());
     }
 
     @Override
-    public boolean isDrawable(RenderedComponent component) {
+    public boolean isDrawable(RenderedComponent component, DrawArea holder) {
         return component != null;
     }
 

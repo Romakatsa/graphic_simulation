@@ -3,7 +3,7 @@ package com.ngeneration.graphic.engine.view;
 import com.ngeneration.graphic.engine.PlaceOnScreen;
 import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.drawers.Drawer;
-import com.ngeneration.graphic.engine.enums.ColorEnum;
+import com.ngeneration.graphic.engine.enums.Color;
 import com.ngeneration.graphic.engine.input.KeyboardEvent;
 import com.ngeneration.graphic.engine.input.MouseEvent;
 import com.ngeneration.graphic.engine.lwjgl_engine.GraphicEngine;
@@ -16,25 +16,25 @@ public class Window<ID> {
     private ID id;
     private String title;
     private Vector size;
-    private ColorEnum background;
+    private Color background;
     private boolean active = false;
     private Thread thread;
     private final List<DrawArea> areas = new ArrayList<>();
     private GraphicEngine<ID> engine;
 
     public Window(ID id, String title, int x, int y, GraphicEngine<ID> engine) {
-        this(id, title, new Vector(x, y), engine, ColorEnum.BLACK);
+        this(id, title, new Vector(x, y), engine, Color.BLACK);
     }
 
     // TODO wrong access modifier
-    public Window(ID id, String title, Vector size, GraphicEngine<ID> engine, ColorEnum background) {
+    public Window(ID id, String title, Vector size, GraphicEngine<ID> engine, Color background) {
         this.title = title;
         this.size = size;
         this.engine = engine;
         this.background = background;
     }
 
-    public Window(String title, Vector size, GraphicEngine<ID> engine, ColorEnum background) {
+    public Window(String title, Vector size, GraphicEngine<ID> engine, Color background) {
         this.title = title;
         this.size = size;
         this.engine = engine;
@@ -42,10 +42,10 @@ public class Window<ID> {
     }
 
     public static <ID> Window create(String title, int width, int height, GraphicEngine<ID> engine) {
-        return create(title, new Vector(width, height), engine, ColorEnum.BLACK);
+        return create(title, new Vector(width, height), engine, Color.BLACK);
     }
 
-    public static <ID> Window create(String title, Vector size, GraphicEngine<ID> engine, ColorEnum background) {
+    public static <ID> Window create(String title, Vector size, GraphicEngine<ID> engine, Color background) {
         Window<ID> window = new Window<>(title, size, engine, background);
         Drawer<ID> drawer = engine.getDrawer();
         ID id = drawer.createAndBindToWindow(window);
@@ -65,7 +65,7 @@ public class Window<ID> {
     }
 
     public DrawArea allocateFullScreenArea() {
-        return allocateAreaOnWindow(PlaceOnScreen.FULL_SCREEN, 1, 1);
+        return allocateAreaOnWindow(PlaceOnScreen.CENTER, 1, 1);
     }
 
     public DrawArea allocateArea(PlaceOnScreen place, double fractionX, double fractionY) {
@@ -86,7 +86,7 @@ public class Window<ID> {
         return areas;
     }
 
-    public ColorEnum getBackground() {
+    public Color getBackground() {
         return background;
     }
 

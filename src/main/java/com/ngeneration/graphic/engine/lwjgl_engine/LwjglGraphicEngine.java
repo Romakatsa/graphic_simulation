@@ -2,21 +2,28 @@ package com.ngeneration.graphic.engine.lwjgl_engine;
 
 import com.ngeneration.graphic.engine.Shape;
 import com.ngeneration.graphic.engine.ThreeVector;
+import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.drawers.Drawer;
 import com.ngeneration.graphic.engine.drawers.LwjglDrawer;
-import com.ngeneration.graphic.engine.enums.ColorEnum;
+import com.ngeneration.graphic.engine.enums.Color;
 import com.ngeneration.graphic.engine.input.*;
-import org.lwjgl.glfw.*;
+import com.ngeneration.graphic.engine.view.DrawArea;
+import org.lwjgl.glfw.GLFWCursorPosCallback;
+import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWMouseButtonCallback;
+import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static com.ngeneration.graphic.engine.utils.MathUtils.loopValueInBounds;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -61,7 +68,7 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
     }
 
     @Override
-    public synchronized Long createWindow(String title, int width, int height, ColorEnum background) {
+    public synchronized Long createWindow(String title, int width, int height, Color background) {
         if (!initialized) {
             init();
             initialized = true;
@@ -70,7 +77,7 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
         // Create the window
         long windowId = glfwCreateWindow(width, height, title, NULL, NULL);
         if (windowId == NULL)
-            throw new RuntimeException("Failed to create the GLFW window");
+            throw new RuntimeException("Failed to createPanelAndGetController the GLFW window");
 
         // Setup a key callback. It will be called every time a key is pressed, repeated or released.
         glfwSetKeyCallback(windowId, (window, key, scancode, action, mods) -> {
@@ -139,26 +146,271 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
     }
 
     @Override
-    public void render(double x, double y, double sx, double sy, double rotate, ColorEnum color, Shape shape, double opacity) {
+    public void render(double x, double y, double sx, double sy, double rotation, Color color, Shape shape,
+                       double opacity, DrawArea holder) {
         //TODO decouple shape drawing
         x = x / 50 - 0;
         y = y / 50 - 0;
         sx = sx / 50 * 1; // TODO this factor define window proportion
         sy = sy / 50 * 1;
+        double x1, x2;
+        double y1, y2;
+        x1 = GeometryUtils.min(-sx / 2, +sx / 2);
+        x2 = GeometryUtils.max(-sx / 2, +sx / 2);
+        y1 = GeometryUtils.min(-sy / 2, +sy / 2);
+        y2 = GeometryUtils.max(-sy / 2, +sy / 2);
+        Vector.PolarCoordinateSystemVector v1 = new Vector(x1, y1).toPolar();
+        Vector.PolarCoordinateSystemVector v2 = new Vector(x1, y2).toPolar();
+        Vector.PolarCoordinateSystemVector v3 = new Vector(x2, y2).toPolar();
+        Vector.PolarCoordinateSystemVector v4 = new Vector(x2, y1).toPolar();
+        double radianBias = Math.PI / 2;
+        v1.setRadian(v1.getRadian() + rotation + radianBias);
+        v2.setRadian(v2.getRadian() + rotation + radianBias);
+        v3.setRadian(v3.getRadian() + rotation + radianBias);
+        v4.setRadian(v4.getRadian() + rotation + radianBias);
+        List<Vector> points = new ArrayList<>();
+//        Vector shift = Vector.zero();
+        Vector shift = new Vector(x, y);
+        points.add(v1.toFlatCartesianVector().plus(shift));
+        points.add(v2.toFlatCartesianVector().plus(shift));
+        points.add(v3.toFlatCartesianVector().plus(shift));
+        points.add(v4.toFlatCartesianVector().plus(shift));
+//        x1 = v1.toFlatCartesianVector().getX();
+//        y1 = v1.toFlatCartesianVector().getY();
+
+
+        if (shape == Shape.RECT_2) {
+            int a;
+            System.out.println();
+        }
+        GeometryUtils.cutPolygon(holder, points);
         glPushMatrix();
         chooseColor(color, 1 - opacity);
-        glTranslated(x, y, 0);
-        glRotated((rotate - Math.PI / 2) * 180 / Math.PI, 0, 0, 1);
+//        glTranslated(x, y, 0);
+//        glRotated((rotation - Math.PI / 2) * 180 / Math.PI, 0, 0, 1);
         x = 0;
         y = 0;
-        glBegin(GL_QUADS);
-        glVertex2f((float) (x + sx / 2), (float) (y + sy / 2));
-        glVertex2f((float) (x + sx / 2), (float) (y - sy / 2));
-        glVertex2f((float) (x - sx / 2), (float) (y - sy / 2));
-        glVertex2f((float) (x - sx / 2), (float) (y + sy / 2));
+        glBegin(GL_POLYGON);
+        for (Vector point : points) {
+            glVertex2f((float) (x + point.getX()), (float) (y + point.getY()));
+        }
+//        glVertex2f((float) (x2), (float) (y2));
+//        glVertex2f((float) (x2), (float) (y1));
+//        glVertex2f((float) (x1), (float) (y1));
+//        glVertex2f((float) (x1), (float) (y2));
         glEnd();
         glPopMatrix();
     }
+
+    private static final class GeometryUtils {
+        private static void cutPolygon(DrawArea holder, List<Vector> points) {
+            if (holder != null) {
+                Vector areaLowBound = Vector.zero().minus(holder.getSize().divide(2).divide(50));
+                Vector areaHighBound = holder.getSize().divide(2).divide(50);
+                Vector reverseZoom = Vector.one().divide(holder.getZoomFactor());
+                double lowX = areaLowBound
+                        .coordinatewiseMultiplication(reverseZoom).getX();
+                double highX =
+                        areaHighBound
+                                .coordinatewiseMultiplication(reverseZoom).getX();
+                double lowY =
+                        areaLowBound
+                                .coordinatewiseMultiplication(reverseZoom).getY();
+                double highY =
+                        areaHighBound
+                                .coordinatewiseMultiplication(reverseZoom).getY();
+
+                int pointsWithinBounds = shiftArrayWithFirstPointIsWithinBound(points, lowX, highX, lowY, highY);
+//                if (pointsWithinBounds > 0) {
+                System.out.println("=================");
+                System.out.println("=================");
+                System.out.println("=================");
+                for (int i = 0; i < points.size(); i++) {
+                    // TODO  before this method convince that polygon within area, stack overflow otherwise
+                    boolean pointRemoved = cutPolygonPoint(points, lowX, i);
+                    if (!pointRemoved) {
+                        pointRemoved = cutPolygonPoint2(points, highX, i);
+                    }
+                    if (!pointRemoved) {
+                        pointRemoved = cutPolygonPoint3(points, lowY, i);
+                    }
+                    if (!pointRemoved) {
+                        cutPolygonPoint4(points, highY, i);
+                    }
+                }
+//                }
+            }
+        }
+
+        private static int shiftArrayWithFirstPointIsWithinBound(List<Vector> points, double lowX, double highX, double lowY, double highY) {
+            boolean shifted = false;
+            int pointsWithinBounds = 0;
+            for (int i = 0; i < points.size(); i++) {
+                Vector point = points.get(i);
+                if (point.getX() >= lowX
+                        && point.getY() >= lowY
+                        && point.getX() <= highX
+                        && point.getY() <= highY) {
+                    if (!shifted) {
+                        pointsWithinBounds++;
+                        for (int j = 0; j < i; j++) {
+                            Vector point2 = points.get(0);
+                            points.add(point2);
+                            points.remove(0);
+                        }
+                        shifted = true;
+                    } else {
+                        pointsWithinBounds++;
+                    }
+                }
+            }
+            return pointsWithinBounds;
+        }
+
+        @SuppressWarnings("all")
+        private static boolean cutPolygonPoint(List<Vector> points, double lowX, int i) {
+            double pointX = points.get(i).getX();
+            double pointY = points.get(i).getY();
+            double computationalError = 0.002;
+            if (pointX < lowX - computationalError) {
+                System.out.println();
+                Vector prevPoint = points.get(loopValueInBounds(i - 1, 0, points.size() - 1));
+                Vector nextPoint = points.get(loopValueInBounds(i + 1, 0, points.size() - 1));
+                System.out.println("currPoint = " + new Vector(pointX, pointY));
+                System.out.println("prevPoint = " + prevPoint);
+                System.out.println("nextPoint = " + nextPoint);
+                double deltaX;
+                double deltaY;
+                int addedPoints = 0;
+                if (prevPoint.getX() >= lowX - computationalError) {
+                    deltaX = Math.abs(prevPoint.getX() - pointX);
+                    deltaY = (prevPoint.getY() - pointY);
+                    double factor = Math.min(Math.abs(lowX - pointX) / deltaX, 1);
+                    points.add(i + addedPoints + 1, new Vector(lowX, pointY + Math.min(Math.abs(lowX - pointX) / deltaX, 1) * deltaY));
+                    addedPoints++;
+                }
+                if (nextPoint.getX() >= lowX - computationalError) {
+                    deltaX = Math.abs(nextPoint.getX() - pointX);
+                    deltaY = (nextPoint.getY() - pointY);
+                    points.add(i + addedPoints + 1, new Vector(lowX, pointY + Math.min(Math.abs(lowX - pointX) / deltaX, 1) * deltaY));
+                    addedPoints++;
+                }
+                points.remove(i);
+                return true;
+            }
+            return false;
+        }
+
+        @SuppressWarnings("all")
+        private static boolean cutPolygonPoint2(List<Vector> points, double highX, int i) {
+            double pointX = points.get(i).getX();
+            double pointY = points.get(i).getY();
+            double computationalError = 0.002;
+            if (pointX > highX + computationalError) {
+                Vector prevPoint = points.get(loopValueInBounds(i - 1, 0, points.size() - 1));
+                Vector nextPoint = points.get(loopValueInBounds(i + 1, 0, points.size() - 1));
+                double deltaX;
+                double deltaY;
+                int addedPoints = 0;
+                if (prevPoint.getX() <= highX + computationalError) {
+                    deltaX = Math.abs(prevPoint.getX() - pointX);
+                    deltaY = (prevPoint.getY() - pointY);
+                    double factor = Math.min(Math.abs(highX - pointX) / deltaX, 1);
+                    points.add(i + addedPoints + 1, new Vector(highX, pointY + Math.min(Math.abs(highX - pointX) / deltaX, 1) * deltaY));
+                    addedPoints++;
+                }
+                if (nextPoint.getX() <= highX + computationalError) {
+                    deltaX = Math.abs(nextPoint.getX() - pointX);
+                    deltaY = (nextPoint.getY() - pointY);
+                    points.add(i + addedPoints + 1, new Vector(highX, pointY + Math.min(Math.abs(highX - pointX) / deltaX, 1) * deltaY));
+                    addedPoints++;
+                }
+                points.remove(i);
+                return true;
+            }
+            return false;
+        }
+
+        //        @SuppressWarnings("all")
+        private static boolean cutPolygonPoint3(List<Vector> points, double lowY, int i) {
+            double pointX = points.get(i).getX();
+            double pointY = points.get(i).getY();
+            double computationalError = 0.002;
+            if (pointY < lowY - computationalError) {
+                Vector prevPoint = points.get(loopValueInBounds(i - 1, 0, points.size() - 1));
+                Vector nextPoint = points.get(loopValueInBounds(i + 1, 0, points.size() - 1));
+                double deltaX;
+                double deltaY;
+                int addedPoints = 0;
+                if (prevPoint.getY() >= lowY - computationalError) {
+                    deltaX = (prevPoint.getX() - pointX);
+                    deltaY = Math.abs(prevPoint.getY() - pointY);
+                    points.add(i + addedPoints + 1, new Vector(pointX + Math.min(Math.abs(lowY - pointY) / deltaY, 1) * deltaX, lowY));
+                    addedPoints++;
+                }
+                if (nextPoint.getY() >= lowY - computationalError) {
+                    deltaX = (nextPoint.getX() - pointX);
+                    deltaY = Math.abs(nextPoint.getY() - pointY);
+                    points.add(i + addedPoints + 1, new Vector(pointX + Math.min(Math.abs(lowY - pointY) / deltaY, 1) * deltaX, lowY));
+                    addedPoints++;
+                }
+                points.remove(i);
+                return true;
+            }
+            return false;
+        }
+
+        //        @SuppressWarnings("all")
+        private static boolean cutPolygonPoint4(List<Vector> points, double highY, int i) {
+            double pointX = points.get(i).getX();
+            double pointY = points.get(i).getY();
+            double computationalError = 0.002;
+            if (pointY > highY + computationalError) {
+                Vector prevPoint = points.get(loopValueInBounds(i - 1, 0, points.size() - 1));
+                Vector nextPoint = points.get(loopValueInBounds(i + 1, 0, points.size() - 1));
+                double deltaX;
+                double deltaY;
+                int addedPoints = 0;
+                if (prevPoint.getY() <= highY + computationalError) {
+                    deltaX = (prevPoint.getX() - pointX);
+                    deltaY = Math.abs(prevPoint.getY() - pointY);
+                    points.add(i + addedPoints + 1, new Vector(pointX + Math.min(Math.abs(highY - pointY) / deltaY, 1) * deltaX, highY));
+                    addedPoints++;
+                }
+                if (nextPoint.getY() <= highY + computationalError) {
+                    deltaX = (nextPoint.getX() - pointX);
+                    deltaY = Math.abs(nextPoint.getY() - pointY);
+                    points.add(i + addedPoints + 1, new Vector(pointX + Math.min(Math.abs(highY - pointY) / deltaY, 1) * deltaX, highY));
+                    addedPoints++;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        private static double min(double... values) {
+            if (values.length == 0) {
+                return Double.NaN;
+            }
+            double min = values[0];
+            for (double value : values) {
+                min = min < value ? min : value;
+            }
+            return min;
+        }
+
+        private static double max(double... values) {
+            if (values.length == 0) {
+                return Double.NaN;
+            }
+            double max = values[0];
+            for (double value : values) {
+                max = max > value ? max : value;
+            }
+            return max;
+        }
+    }
+
 
     @Override
     public void afterFrame(Long id) {
@@ -176,30 +428,31 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
         glfwSetErrorCallback(null).free();
     }
 
-    private static void chooseColor(ColorEnum color, double opacity) {
+    private static void chooseColor(Color color, double opacity) {
         if (color == null) {
             return;
         }
-        switch (color) {
-            case WHITE:
-                glColor4d(0.8f, 0.8f, 0.8f, opacity);
-                break;
-            case RED:
-                glColor4d(1.0f, 0.0f, 0.0f, opacity);
-                glColor4d(0.733f, 0.223f, 0.168f, opacity);
-                break;
-            case GREEN:
-                glColor4d(0.478f, 0.737f, 0.345f, opacity);
-                break;
-            case BLUE:
-                glColor4d(0.247f, 0.494f, 1.0f, opacity);
-                break;
-            case BLACK:
-                glColor4d(0f, 0.0f, 0.0f, opacity);
-                break;
-            default:
-                glColor4d(color.getRed(), color.getGreen(), color.getBlue(), opacity);
-        }
+        glColor4d(color.getRed(), color.getGreen(), color.getBlue(), opacity);
+//        switch (color) {
+//            case Color.WHITE:
+//                glColor4d(0.8f, 0.8f, 0.8f, opacity);
+//                break;
+//            case RED:
+//                glColor4d(1.0f, 0.0f, 0.0f, opacity);
+//                glColor4d(0.733f, 0.223f, 0.168f, opacity);
+//                break;
+//            case GREEN:
+//                glColor4d(0.478f, 0.737f, 0.345f, opacity);
+//                break;
+//            case BLUE:
+//                glColor4d(0.247f, 0.494f, 1.0f, opacity);
+//                break;
+//            case BLACK:
+//                glColor4d(0f, 0.0f, 0.0f, opacity);
+//                break;
+//            default:
+//                glColor4d(color.getRed(), color.getGreen(), color.getBlue(), opacity);
+//        }
     }
 
     // TODO refactor it, it's just copy from old version
@@ -236,7 +489,7 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
             mouse.setY(100 - ypos / height * 100);
         }));
 
-//        glfwSetScrollCallback(windowId, GLFWScrollCallback.create((l, v, v1) -> {
+//        glfwSetScrollCallback(windowId, GLFWScrollCallback.createPanelAndGetController((l, v, v1) -> {
 //            double factor = 10;
 //            if (v1 == 1) {
 //                display.setScale(display.getScale().multiple(

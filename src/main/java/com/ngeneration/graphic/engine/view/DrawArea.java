@@ -3,7 +3,7 @@ package com.ngeneration.graphic.engine.view;
 import com.ngeneration.graphic.engine.Shape;
 import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.drawablecomponents.RenderedComponent;
-import com.ngeneration.graphic.engine.enums.ColorEnum;
+import com.ngeneration.graphic.engine.enums.Color;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ public abstract class DrawArea extends RenderedComponent implements AutoCloseabl
     protected double rotationRadian;
 
     public DrawArea(Window holderWindow) {
-        super(Vector.zero(), Vector.diag(100), 0, ColorEnum.WHITE, 0, Shape.RECT);
+        super(Vector.zero(), Vector.diag(100), 0, Color.WHITE, 0, Shape.RECT);
         this.holderWindow = holderWindow;
     }
 

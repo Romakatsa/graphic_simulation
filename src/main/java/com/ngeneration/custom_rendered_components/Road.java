@@ -5,7 +5,7 @@ import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.drawablecomponents.Line;
 import com.ngeneration.graphic.engine.drawablecomponents.RenderedComponent;
 import com.ngeneration.graphic.engine.drawers.Drawer;
-import com.ngeneration.graphic.engine.enums.ColorEnum;
+import com.ngeneration.graphic.engine.enums.Color;
 import com.ngeneration.graphic.engine.view.DrawArea;
 
 import java.util.*;
@@ -15,21 +15,21 @@ public class Road extends RenderedComponent {
     private final Set<Line> lines = new HashSet<>();
 
     Road(BoundsBuilder builder) {
-        super(Vector.zero(), Vector.one(), 0, ColorEnum.DARK_GREEN, 0, Shape.RECT);
+        super(Vector.zero(), Vector.one(), 0, Color.DARK_GREEN, 0, Shape.RECT);
         this.bounds = Collections.unmodifiableSet(builder.bounds);
         for (List<Vector> points : builder.bounds) {
             for (int i = 1; i < points.size(); i++) {
-                this.lines.add(new Line(points.get(i - 1), points.get(i), 0.5, ColorEnum.BLACK, 0));
+                this.lines.add(new Line(points.get(i - 1), points.get(i), 0.5, Color.BLACK, 0));
             }
         }
     }
 
     Road(Builder builder) {
-        super(Vector.zero(), Vector.one(), 0, ColorEnum.DARK_GREEN, 0, Shape.RECT);
+        super(Vector.zero(), Vector.one(), 0, Color.DARK_GREEN, 0, Shape.RECT);
         this.bounds = Collections.unmodifiableSet(builder.bounds);
         for (List<Vector> points : builder.bounds) {
             for (int i = 1; i < points.size(); i++) {
-                this.lines.add(new Line(points.get(i - 1), points.get(i), 0.5, ColorEnum.BLACK, 0));
+                this.lines.add(new Line(points.get(i - 1), points.get(i), 0.5, Color.BLACK, 0));
             }
         }
     }

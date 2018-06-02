@@ -1,0 +1,6 @@
+
+
+1. Facade. Simplify drawing API
+2. Redesign: RenderedComponent inheritance. Too much impact on client
+3. Redesign: Singleton engine and drawer
+4. Decouple Input handling and Drawer

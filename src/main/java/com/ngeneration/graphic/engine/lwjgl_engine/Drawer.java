@@ -1,13 +1,13 @@
 package com.ngeneration.graphic.engine.lwjgl_engine;
 
-import com.ngeneration.graphic.engine.enums.ColorEnum;
+import com.ngeneration.graphic.engine.enums.Color;
 
 import static org.lwjgl.opengl.GL11.*;
 
 class Drawer {
 
     static void rect(double x, double y, double sx, double sy, double rotate,
-                     ColorEnum color, double opacity) {
+                     Color color, double opacity) {
         x = x / 50 - 1;
         y = y / 50 - 1;
         sx = sx / 50 * 0.8;
@@ -28,13 +28,13 @@ class Drawer {
     }
 
     static void rect2(double x, double y, double sx, double sy, double rotate,
-                              ColorEnum color, double opacity) {
+                      Color color, double opacity) {
         rect(x, y, sx, sy, rotate, color, opacity);
-        triangle2(x, y, sx / 2, sy / 2, rotate, ColorEnum.BLACK, opacity);
+        triangle2(x, y, sx / 2, sy / 2, rotate, Color.BLACK, opacity);
     }
 
     static void circle(double x, double y, double sx, double sy, double rotation,
-                               ColorEnum color, double opacity) {
+                       Color color, double opacity) {
         glPushMatrix();
         {
             chooseColor(color, opacity);
@@ -66,7 +66,7 @@ class Drawer {
     }
 
     static void star(double x, double y, double sx, double sy, double rotation,
-                             ColorEnum color, double opacity) {
+                     Color color, double opacity) {
         glPushMatrix();
         {
             chooseColor(color, opacity);
@@ -100,7 +100,7 @@ class Drawer {
     }
 
     static void triangle(double x, double y, double sx, double sy, double rotate,
-                                 ColorEnum color, double opacity) {
+                         Color color, double opacity) {
         x = x / 50 - 1;
         y = y / 50 - 1;
         sx = sx / 50;
@@ -129,7 +129,7 @@ class Drawer {
     }
 
     static void triangle2(double x, double y, double sx, double sy, double rotate,
-                                  ColorEnum color, double opacity) {
+                          Color color, double opacity) {
 
         double sx1 = sx / 3;
         x = normalise(x) - 1;
@@ -154,7 +154,7 @@ class Drawer {
     }
 
     static void arrow(double x, double y, double sx, double sy, double rotate,
-                              ColorEnum color, double opacity) {
+                      Color color, double opacity) {
         double sx1 = sx / 3;
         x = normalise(x) - 1;
         y = normalise(y) - 1;
@@ -187,26 +187,27 @@ class Drawer {
     }
 
 
-    private static void chooseColor(ColorEnum color, double opacity) {
-        switch (color) {
-            case WHITE:
-                glColor4d(0.8f, 0.8f, 0.8f, opacity);
-                break;
-            case RED:
-                glColor4d(1.0f, 0.0f, 0.0f, opacity);
-                glColor4d(0.733f, 0.223f, 0.168f, opacity);
-                break;
-            case GREEN:
-                glColor4d(0.478f, 0.737f, 0.345f, opacity);
-                break;
-            case BLUE:
-                glColor4d(0.247f, 0.494f, 1.0f, opacity);
-                break;
-            case BLACK:
-                glColor4d(0f, 0.0f, 0.0f, opacity);
-                break;
-            default:
-                glColor4d(color.getRed(), color.getGreen(), color.getBlue(), opacity);
-        }
+    private static void chooseColor(Color color, double opacity) {
+        glColor4d(color.getRed(), color.getGreen(), color.getBlue(), opacity);
+//        switch (color) {
+//            case WHITE:
+//                glColor4d(0.8f, 0.8f, 0.8f, opacity);
+//                break;
+//            case RED:
+//                glColor4d(1.0f, 0.0f, 0.0f, opacity);
+//                glColor4d(0.733f, 0.223f, 0.168f, opacity);
+//                break;
+//            case GREEN:
+//                glColor4d(0.478f, 0.737f, 0.345f, opacity);
+//                break;
+//            case BLUE:
+//                glColor4d(0.247f, 0.494f, 1.0f, opacity);
+//                break;
+//            case BLACK:
+//                glColor4d(0f, 0.0f, 0.0f, opacity);
+//                break;
+//            default:
+//                glColor4d(color.getRed(), color.getGreen(), color.getBlue(), opacity);
+//        }
     }
 }

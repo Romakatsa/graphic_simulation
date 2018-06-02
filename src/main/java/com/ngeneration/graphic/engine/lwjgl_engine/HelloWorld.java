@@ -16,13 +16,13 @@ public class HelloWorld {
 
 //    private GraphicEngine<Long> engine = new LwjglGraphicEngine();
 //
-//    public void run() {
+//    public void start() {
 //        System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 //
 //        engine.init();
-//        Window<Long> window = Window.<Long>create("Main window", 900, 500, engine);
+//        Window<Long> window = Window.<Long>createPanelAndGetController("Main window", 900, 500, engine);
 ////        Window window2 = new Window("Main window", 200, 200, engine);
-////        window2.create();
+////        window2.createPanelAndGetController();
 //
 //        DrawArea backgroundArea = window.allocateArea(Corner.TOP_LEFT_CORNER, 1, 1);
 //        DrawContext mainContext = new DrawContext("main", true, 10);
@@ -37,7 +37,7 @@ public class HelloWorld {
 //                .build();
 //        mainContext.put(5, car);
 //
-////        window.create();
+////        window.createPanelAndGetController();
 //
 //
 //        try {
@@ -50,7 +50,7 @@ public class HelloWorld {
 //    }
 //
 //    public static void main(String[] args) {
-//        new HelloWorld().run();
+//        new HelloWorld().start();
 //    }
 
 

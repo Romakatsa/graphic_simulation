@@ -19,7 +19,7 @@ public class Console2DDrawer extends Drawer {
     }
 
     @Override
-    public void doRender(RenderedComponent component) {
+    public void doRender(RenderedComponent component, DrawArea holder) {
         double x = Math.abs(component.getPosition().getX());
         double y = Math.abs(component.getPosition().getY());
         int resolution = 20;
@@ -38,7 +38,7 @@ public class Console2DDrawer extends Drawer {
     }
 
     @Override
-    public boolean isDrawable(RenderedComponent component) {
+    public boolean isDrawable(RenderedComponent component, DrawArea holder) {
         return component != null
                 && component.getPosition() != null
                 && component.getSize() != null;
