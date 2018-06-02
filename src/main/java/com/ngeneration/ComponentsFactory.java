@@ -71,7 +71,6 @@ public class ComponentsFactory {
                 T clone = (T) component.clone();
                 for (BiConsumer<T, Integer> transform : transformation) {
                     transform.accept(clone, i);
-                    System.out.println("11112");
                 }
                 components.add(clone);
             }
@@ -133,7 +132,6 @@ public class ComponentsFactory {
         public void accept(T component, Integer iteration) {
             int side = (int) (Math.sqrt(amount));
             double step = (100d / Math.sqrt(amount));
-            System.out.println("side = " + side);
             component.setPosition(new Vector(step * (iteration / side), step * (iteration % side)));
         }
     }

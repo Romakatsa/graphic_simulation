@@ -54,7 +54,6 @@ public class RectDrawArea extends DrawArea {
                 bottomLeftCorner.minus(halfBorderShiftY).minus(halfBorderShiftX),
                 bottomRightCorner.minus(halfBorderShiftY).plus(halfBorderShiftX),
                 borderWidth, borderColor, borderOpacity);
-        System.out.println("border[3] = " + border[3]);
     }
 
     public RectDrawArea(Window holderWindow, PlaceOnScreen place, double fractionX, double fractionY) {
@@ -75,8 +74,6 @@ public class RectDrawArea extends DrawArea {
             y = -50 + size.divide(2).getY();
         }
         setPosition(new Vector(x, y));
-        System.out.println("getSize() = " + getSize());
-        System.out.println("getPosition() = " + getPosition());
     }
 
     @Override

@@ -178,11 +178,6 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
 //        x1 = v1.toFlatCartesianVector().getX();
 //        y1 = v1.toFlatCartesianVector().getY();
 
-
-        if (shape == Shape.RECT_2) {
-            int a;
-            System.out.println();
-        }
         GeometryUtils.cutPolygon(holder, points);
         glPushMatrix();
         chooseColor(color, 1 - opacity);
@@ -220,30 +215,42 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
                         areaHighBound
                                 .coordinatewiseMultiplication(reverseZoom).getY();
 
-                int pointsWithinBounds = shiftArrayWithFirstPointIsWithinBound(points, lowX, highX, lowY, highY);
-//                if (pointsWithinBounds > 0) {
-                System.out.println("=================");
-                System.out.println("=================");
-                System.out.println("=================");
-                for (int i = 0; i < points.size(); i++) {
-                    // TODO  before this method convince that polygon within area, stack overflow otherwise
-                    boolean pointRemoved = cutPolygonPoint(points, lowX, i);
-                    if (!pointRemoved) {
-                        pointRemoved = cutPolygonPoint2(points, highX, i);
-                    }
-                    if (!pointRemoved) {
-                        pointRemoved = cutPolygonPoint3(points, lowY, i);
-                    }
-                    if (!pointRemoved) {
-                        cutPolygonPoint4(points, highY, i);
+                shiftArrayWithFirstPointIsWithinBound(points, lowX, highX, lowY, highY);
+                for (int k = 0; k < 2; k++) {
+                    for (int i = 0; i < points.size(); i++) {
+                        boolean pointRemoved = cutPolygonPoint(points, lowX, i);
+                        if (!pointRemoved) {
+                            pointRemoved = cutPolygonPoint2(points, highX, i);
+                        }
+                        if (!pointRemoved) {
+                            pointRemoved = cutPolygonPoint3(points, lowY, i);
+                        }
+                        if (!pointRemoved) {
+                            cutPolygonPoint4(points, highY, i);
+                        }
                     }
                 }
-//                }
             }
         }
 
-        private static int shiftArrayWithFirstPointIsWithinBound(List<Vector> points, double lowX, double highX, double lowY, double highY) {
-            boolean shifted = false;
+        private static void shiftArrayWithFirstPointIsWithinBound(List<Vector> points, double lowX, double highX, double lowY, double highY) {
+            for (int i = 0; i < points.size(); i++) {
+                Vector point = points.get(i);
+                if (point.getX() >= lowX
+                        && point.getY() >= lowY
+                        && point.getX() <= highX
+                        && point.getY() <= highY) {
+                    for (int j = 0; j < i; j++) {
+                        Vector point2 = points.get(0);
+                        points.add(point2);
+                        points.remove(0);
+                    }
+                    break;
+                }
+            }
+        }
+
+        private static int countPointsWithinBounds(List<Vector> points, double lowX, double highX, double lowY, double highY) {
             int pointsWithinBounds = 0;
             for (int i = 0; i < points.size(); i++) {
                 Vector point = points.get(i);
@@ -251,17 +258,7 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
                         && point.getY() >= lowY
                         && point.getX() <= highX
                         && point.getY() <= highY) {
-                    if (!shifted) {
-                        pointsWithinBounds++;
-                        for (int j = 0; j < i; j++) {
-                            Vector point2 = points.get(0);
-                            points.add(point2);
-                            points.remove(0);
-                        }
-                        shifted = true;
-                    } else {
-                        pointsWithinBounds++;
-                    }
+                    pointsWithinBounds++;
                 }
             }
             return pointsWithinBounds;
@@ -273,12 +270,8 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
             double pointY = points.get(i).getY();
             double computationalError = 0.002;
             if (pointX < lowX - computationalError) {
-                System.out.println();
                 Vector prevPoint = points.get(loopValueInBounds(i - 1, 0, points.size() - 1));
                 Vector nextPoint = points.get(loopValueInBounds(i + 1, 0, points.size() - 1));
-                System.out.println("currPoint = " + new Vector(pointX, pointY));
-                System.out.println("prevPoint = " + prevPoint);
-                System.out.println("nextPoint = " + nextPoint);
                 double deltaX;
                 double deltaY;
                 int addedPoints = 0;
@@ -383,6 +376,7 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
                     points.add(i + addedPoints + 1, new Vector(pointX + Math.min(Math.abs(highY - pointY) / deltaY, 1) * deltaX, highY));
                     addedPoints++;
                 }
+                points.remove(i);
                 return true;
             }
             return false;
@@ -409,6 +403,7 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
             }
             return max;
         }
+
     }
 
 
@@ -467,7 +462,6 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
         });
 
         glfwSetMouseButtonCallback(windowId, GLFWMouseButtonCallback.create((window, button, action, mods) -> {
-            System.out.println("smth");
             if (button == 0 && action > 0) {
                 mouse.setLastMousePosition(new ThreeVector(mouse.getX(), mouse.getY(), 0));
             } else if (button == 0 && action == 0) {

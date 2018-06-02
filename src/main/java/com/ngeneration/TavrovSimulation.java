@@ -101,8 +101,8 @@ public class TavrovSimulation extends AbstractSimulation {
                     );
                 }
         );
-        Set<Car> smallCarPopulation = populate(smallCar, 100,
-                new UniformPopulator<>(100),
+        Set<Car> smallCarPopulation = populate(smallCar, 1000,
+                new UniformPopulator<>(1000),
                 new SimpleNameGenerator<>(),
                 new BindingWithScheduler<>(loop, physics),
                 (curCar, iteration) -> addSchedulers(curCar, driver),
