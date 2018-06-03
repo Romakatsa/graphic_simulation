@@ -105,7 +105,7 @@ public class Road extends RenderedComponent {
             Vector newLeftPoint = lastLeftPoint.plus(plus);
             Vector newRightPoint = lastRightPoint.plus(plus);
 
-            Vector.PolarCoordinateSystemVector polar;
+            Vector.Polar polar;
             polar = plus.toPolar();
             polar.setRadian(polar.getRadian() - Math.PI / 2);
             polar.setModule(currentWidth/2);
@@ -117,7 +117,7 @@ public class Road extends RenderedComponent {
 
 //            newRightPoint = newRightPoint.minus(polar.toFlatCartesianVector());
 
-//            Vector.PolarCoordinateSystemVector polar;
+//            Vector.Polar polar;
 //            polar = newLeftPoint.minus(center).toPolar();
 //            polar.setRadian(plus.toPolar().getRadian());
 //            newLeftPoint = polar.toFlatCartesianVector().plus(center);

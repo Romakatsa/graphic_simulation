@@ -203,7 +203,7 @@ public class LwjglDrawer extends Drawer<Long> {
             zoom = zoom.coordinatewiseMultiplication(area.getSize().divide(100));
         }
         Vector shift = area.getShift().plus(area.getPosition());
-        Vector.PolarCoordinateSystemVector polar
+        Vector.Polar polar
                 = componentPosition//.coordinatewiseMultiplication(zoom).plus(shift)
                 .toPolar();
         polar.setRadian(polar.getRadian() + areaRotation);

@@ -52,7 +52,7 @@ public class IntelligentDriver {
             for (int i = 0; i < viewLinesObstacleDistance.length; i++) {
                 double distance = Double.NaN;
                 Vector carPosition = car.getPosition();
-                Vector viewLineEndPoint = carPosition.plus(new Vector.PolarCoordinateSystemVector(
+                Vector viewLineEndPoint = carPosition.plus(new Vector.Polar(
                         car.getRotation() - viewFieldWidthRadian / 2 + i * (viewFieldWidthRadian / (viewLineAmount - 1)),
                         10000).toFlatCartesianVector());
 

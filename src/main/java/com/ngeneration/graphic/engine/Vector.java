@@ -66,37 +66,42 @@ public class Vector {
         } else if (x < 0 && y < 0) {
             angle = innerAngle + PI;
         } else {
+            Thread.dumpStack();
             System.err.println("Wrong angle value: " + innerAngle);
         }
         return angle;
     }
 
     public Vector projectOn(Vector vector) {
-        double angle = this.angle();
-        double angle2 = vector.angle();
+        double angle = MathUtils.loopValueInBounds(this.angle(), -Math.PI, Math.PI);
+        double angle2 = MathUtils.loopValueInBounds(vector.angle(), -Math.PI, Math.PI);
         double deltaAngle = angle - angle2;
-        if (abs(deltaAngle) <= PI / 2) {
-            return new PolarCoordinateSystemVector(vector.angle(), abs(cos(deltaAngle) * this.module()))
-                    .toFlatCartesianVector();
-        } else {
-            return new PolarCoordinateSystemVector(vector.angle() + PI, abs(cos(deltaAngle) * this.module()))
-                    .toFlatCartesianVector();
-        }
+        return new Polar(MathUtils.loopValueInBounds(angle2, -Math.PI, Math.PI),
+                abs(cos(deltaAngle) * this.module()))
+                .toFlatCartesianVector();
+//        if (abs(deltaAngle) <= PI / 2) {
+//            return new Polar(vector.angle(), abs(cos(deltaAngle) * this.module()))
+//                    .toFlatCartesianVector();
+//        } else {
+//            return new Polar(vector.angle() + PI, abs(cos(deltaAngle) * this.module()))
+//                    .toFlatCartesianVector();
+//        }
     }
 
     public Vector projectRestOn(Vector vector) {
-        double angle = this.angle();
-        double angle2 = vector.angle();
+        double angle = MathUtils.loopValueInBounds(this.angle(), -Math.PI, Math.PI);
+        double angle2 = MathUtils.loopValueInBounds(vector.angle(), -Math.PI, Math.PI);
         double deltaAngle = (angle - angle2) % (2 * PI);
         double resultAngle = vector.angle() + PI / 2;
         if (deltaAngle > PI || (deltaAngle < 0 && deltaAngle > -PI)) {
             resultAngle *= -1;
         }
-        return new PolarCoordinateSystemVector(resultAngle, abs(sin(deltaAngle) * this.module()))
+        return new Polar(resultAngle,
+                abs(sin(deltaAngle) * this.module()))
                 .toFlatCartesianVector();
     }
 
-    public PolarCoordinateSystemVector toPolar() {
+    public Polar toPolar() {
         double r;
         double phi;
         r = sqrt(x * x + y * y);
@@ -117,16 +122,25 @@ public class Vector {
         } else {
             phi = atan(y / x) + PI;
         }
-        return new PolarCoordinateSystemVector(phi, r);
+        return new Polar(phi, r);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof Vector)) {
+            return false;
+        }
+        Vector vector = (Vector) obj;
+        return MathUtils.round(vector.getX(), 3) == MathUtils.round(this.getX(), 3)
+                && MathUtils.round(vector.getY(), 3) == MathUtils.round(this.getY(), 3);
+    }
 
-    public static class PolarCoordinateSystemVector {
+    public static class Polar {
 
         private double radian;
         private double module;
 
-        public PolarCoordinateSystemVector(double radian, double module) {
+        public Polar(double radian, double module) {
             this.radian = radian;
             this.module = module;
         }

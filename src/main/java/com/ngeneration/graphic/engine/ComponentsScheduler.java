@@ -31,7 +31,7 @@ public class ComponentsScheduler<T extends RenderedComponent> { // todo the same
         double timesPerSecond = 1000d / intervalMillis;
         while (!thread.isInterrupted()) {
             long startIterationMillis = System.nanoTime() / 1_000_000;
-            action( timesPerSecond / 1000d);
+            action( intervalMillis / 1000d);
             try {
                 sleep(timesPerSecond, startIterationMillis);
             } catch (InterruptedException e) {

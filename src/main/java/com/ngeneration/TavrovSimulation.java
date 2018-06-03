@@ -4,7 +4,10 @@ import com.ngeneration.ai.BrownianDriver;
 import com.ngeneration.ai.IntelligentDriver;
 import com.ngeneration.custom_rendered_components.Car;
 import com.ngeneration.custom_rendered_components.Road;
-import com.ngeneration.graphic.engine.*;
+import com.ngeneration.graphic.engine.ComponentsScheduler;
+import com.ngeneration.graphic.engine.PlaceOnScreen;
+import com.ngeneration.graphic.engine.ThreeVector;
+import com.ngeneration.graphic.engine.Vector;
 import com.ngeneration.graphic.engine.commands.BrownianDriverCommand;
 import com.ngeneration.graphic.engine.commands.Command;
 import com.ngeneration.graphic.engine.commands.QuitCommand;
@@ -47,6 +50,7 @@ public class TavrovSimulation extends AbstractSimulation {
     private DrawArea backgroundArea;
     private Window<Long> mainWindow;
     private DrawArea mapArea;
+    private Car car;
 
     public TavrovSimulation() {
         super("Tavrov simulation");
@@ -65,9 +69,9 @@ public class TavrovSimulation extends AbstractSimulation {
                 .withRotation(Math.PI / 4)
                 .build();
         Car bigCar = aCar()
-                .withSize(new Vector(3, 7))
+                .withSize(new Vector(2, 5))
                 .withName("Super car")
-                .withSpeed(Vector.diag(4))
+                .withSpeed(Vector.diag(0))
                 .build();
         Road road = aRoad()
                 .withWidth(30)
@@ -80,7 +84,7 @@ public class TavrovSimulation extends AbstractSimulation {
                 .nextPoint(50, 0)
                 .build();
         Set<Car> bigCarPopulation = populate(bigCar, 1,
-                new FixedPositionPopulator<>(-50, 0),
+                new FixedPositionPopulator<>(-0, 0),
                 new SimpleNameGenerator<>(),
                 new BindingWithScheduler<>(loop, physics),
                 (curCar, iteration) -> {
@@ -101,6 +105,7 @@ public class TavrovSimulation extends AbstractSimulation {
                     );
                 }
         );
+        car = bigCarPopulation.iterator().next();
         Set<Car> smallCarPopulation = populate(smallCar, 1000,
                 new UniformPopulator<>(1000),
                 new SimpleNameGenerator<>(),
@@ -136,7 +141,7 @@ public class TavrovSimulation extends AbstractSimulation {
         GraphicEngine<Long> engine = LwjglGraphicEngine.getInstance();
         mainWindow = Window.<Long>create("TavrovSimulation", 800, 800, engine);
         windows.add(mainWindow);
-        backgroundArea = mainWindow.allocateArea(PlaceOnScreen.CENTER, 0.5, 0.5);
+        backgroundArea = mainWindow.allocateArea(PlaceOnScreen.CENTER, 0.95, 0.95);
         mapArea = mainWindow.allocateArea(PlaceOnScreen.BOTTOM_LEFT_CORNER, 0.1, 0.1);
         secondaryRole = new DrawContext("secondary");
         player = new DrawContext("player");
@@ -152,7 +157,7 @@ public class TavrovSimulation extends AbstractSimulation {
 
         mapArea.setSize(Vector.diag(50));
         mapArea.setZoom(Vector.diag(2));
-        mapArea.setVisible(false);
+        mapArea.setVisible(true);
     }
 
     private void initPanels() {
@@ -223,6 +228,20 @@ public class TavrovSimulation extends AbstractSimulation {
             //TODO show report
         },
                 ActionType.CLICKED, GLFW_KEY_I));
+        mainWindow.addKeyboardEvent(new KeyboardEvent(()
+                -> car.leftRotation(),
+                ActionType.PRESSED, GLFW_KEY_A));
+        mainWindow.addKeyboardEvent(new KeyboardEvent(()
+                -> car.rightRotation(),
+                ActionType.PRESSED, GLFW_KEY_D));
+        mainWindow.addKeyboardEvent(new KeyboardEvent(()
+                -> car.setAcceleration(
+                new Vector.Polar(car.getRotation(), 100).toFlatCartesianVector()),
+                ActionType.PRESSED, GLFW_KEY_W));
+        mainWindow.addKeyboardEvent(new KeyboardEvent(()
+                -> car.setAcceleration(
+                new Vector.Polar(car.getRotation(), -100).toFlatCartesianVector()),
+                ActionType.PRESSED, GLFW_KEY_S));
     }
 
     private BrownianDriver createDriver(double speed, double twistExtent) {

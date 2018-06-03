@@ -159,10 +159,10 @@ public class LwjglGraphicEngine implements GraphicEngine<Long> {
         x2 = GeometryUtils.max(-sx / 2, +sx / 2);
         y1 = GeometryUtils.min(-sy / 2, +sy / 2);
         y2 = GeometryUtils.max(-sy / 2, +sy / 2);
-        Vector.PolarCoordinateSystemVector v1 = new Vector(x1, y1).toPolar();
-        Vector.PolarCoordinateSystemVector v2 = new Vector(x1, y2).toPolar();
-        Vector.PolarCoordinateSystemVector v3 = new Vector(x2, y2).toPolar();
-        Vector.PolarCoordinateSystemVector v4 = new Vector(x2, y1).toPolar();
+        Vector.Polar v1 = new Vector(x1, y1).toPolar();
+        Vector.Polar v2 = new Vector(x1, y2).toPolar();
+        Vector.Polar v3 = new Vector(x2, y2).toPolar();
+        Vector.Polar v4 = new Vector(x2, y1).toPolar();
         double radianBias = Math.PI / 2;
         v1.setRadian(v1.getRadian() + rotation + radianBias);
         v2.setRadian(v2.getRadian() + rotation + radianBias);

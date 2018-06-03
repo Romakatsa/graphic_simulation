@@ -20,7 +20,7 @@ public class BrownianDriver implements Driver {
     }
 
     private void computeSpeedModule(Car component, double deltaTime) {
-        component.setSpeed(new Vector.PolarCoordinateSystemVector(
+        component.setSpeed(new Vector.Polar(
                 component.getRotation(), speedModule * deltaTime)
                 .toFlatCartesianVector());
     }
